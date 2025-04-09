@@ -1,20 +1,3 @@
-// import { View, StyleSheet  } from 'react-native'
-// import React from 'react'
-// import { useRouter } from 'expo-router';
-// import { TextInput, Button, Text, HelperText, ActivityIndicator } from 'react-native-paper';
-
-// export default function login() {
-//     const router = useRouter();
-
-//   return (
-//     <View>
-//       <Button title='Fazer login'         
-//       onPress={() => router.push("/home/HomeDocuments")} // Navega para a tela "home"
-//  ></Button>
-//     </View>
-//   )
-// }
-
 import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -29,7 +12,6 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState('');
 
   const handleLogin = () => {
-    // Validação simples de campos
     setEmailError('');
     setPasswordError('');
 
@@ -43,18 +25,20 @@ export default function Login() {
       return;
     }
 
-    // Simulando a chamada de autenticação
     setLoading(true);
     
     setTimeout(() => {
-      // Simulando sucesso no login (aqui você faria a autenticação real)
       setLoading(false);
-      router.push("/home/HomeDocuments"); // Navega para a tela "home" após login
+      router.push("/home/HomeDocuments"); 
     }, 2000);
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Entre com a sua conta</Text>
+
+      <Text style={styles.subtitle}>Insira seu email e sua senha para realizar o login</Text>
+
       <TextInput
         label="Email"
         value={email}
@@ -63,6 +47,7 @@ export default function Login() {
         autoCapitalize="none"
         style={styles.input}
         error={!!emailError}
+        outlineColor="#C0C0C0" 
       />
       <HelperText type="error" visible={!!emailError}>
         {emailError}
@@ -75,22 +60,23 @@ export default function Login() {
         secureTextEntry
         style={styles.input}
         error={!!passwordError}
+        outlineColor="#C0C0C0" 
       />
       <HelperText type="error" visible={!!passwordError}>
         {passwordError}
       </HelperText>
-
       <Button 
         mode="contained" 
         onPress={handleLogin} 
         style={styles.button} 
         loading={loading}
+        labelStyle={styles.buttonLabel}
       >
         {loading ? <ActivityIndicator color="white" /> : 'Fazer Login'}
       </Button>
 
       <Text style={styles.registerText}>
-        Não tem uma conta? <Text style={styles.link}>Cadastre-se</Text>
+        Não tem uma conta ainda? <Text style={styles.link}>Registrar agora</Text>
       </Text>
     </View>
   );
@@ -101,19 +87,43 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: '#212121',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20, // Aumentando o espaço entre o título e o subtítulo
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 40, // Aumentando o espaço entre o subtítulo e os campos
+    color: '#C0C0C0',
   },
   input: {
-    marginBottom: 12,
+    marginBottom: 20, // Aumentando o espaço entre os campos
+    backgroundColor: '#212121',
+    borderWidth: 1,   // Adicionando borda
+    borderColor: '#C0C0C0', // Cor da borda
+    borderRadius: 8, // Bordas arredondadas
+    paddingHorizontal: 12, // Padding para melhorar a visualização
+    paddingVertical: 8,   // Padding para melhorar a visualização
   },
   button: {
-    marginTop: 16,
+    marginTop: 24,  // Aumentando o espaço entre o botão e o campo de senha
+    backgroundColor: '#3498DB',
+    borderRadius: 8, // Bordas arredondadas no botão
+  },
+  buttonLabel: {
+    color: 'white',  // Cor do texto do botão
   },
   registerText: {
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: 24,  // Aumentando o espaço entre o botão e o texto de registro
+    color: '#D11B1B',
   },
   link: {
-    color: '#007bff',
+    color: '#3498DB',
   }
 });
