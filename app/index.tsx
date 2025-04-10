@@ -1,3 +1,4 @@
+
 import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -12,6 +13,7 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState('');
 
   const handleLogin = () => {
+
     setEmailError('');
     setPasswordError('');
 
@@ -25,11 +27,13 @@ export default function Login() {
       return;
     }
 
+
     setLoading(true);
     
     setTimeout(() => {
       setLoading(false);
       router.push("/home/HomeDocuments"); 
+
     }, 2000);
   };
 
@@ -48,6 +52,7 @@ export default function Login() {
         style={styles.input}
         error={!!emailError}
         outlineColor="#C0C0C0" 
+
       />
       <HelperText type="error" visible={!!emailError}>
         {emailError}
@@ -61,6 +66,8 @@ export default function Login() {
         style={styles.input}
         error={!!passwordError}
         outlineColor="#C0C0C0" 
+
+
       />
       <HelperText type="error" visible={!!passwordError}>
         {passwordError}
@@ -71,12 +78,15 @@ export default function Login() {
         style={styles.button} 
         loading={loading}
         labelStyle={styles.buttonLabel}
+
       >
         {loading ? <ActivityIndicator color="white" /> : 'Fazer Login'}
       </Button>
 
       <Text style={styles.registerText}>
+
         Não tem uma conta ainda? <Text style={styles.link}>Registrar agora</Text>
+
       </Text>
     </View>
   );
@@ -87,6 +97,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+
     backgroundColor: '#212121',
   },
   title: {
@@ -125,5 +136,20 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#3498DB',
+
+    backgroundColor: 'white',
+  },
+  input: {
+    marginBottom: 12,
+  },
+  button: {
+    marginTop: 16,
+  },
+  registerText: {
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  link: {
+    color: '#007bff',
   }
 });
