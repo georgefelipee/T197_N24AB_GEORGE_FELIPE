@@ -55,6 +55,8 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
+       <Text>Entre com a sua conta</Text>
+      <Text>Insira seu email e sua senha para realizar o login</Text>
       <TextInput
         label="Email"
         value={email}
