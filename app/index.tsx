@@ -1,7 +1,7 @@
 
 import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { TextInput, Button, Text, HelperText, ActivityIndicator } from 'react-native-paper';
 import { login } from './services/loginService';
 import Toast from 'react-native-toast-message';
@@ -97,7 +97,7 @@ export default function Login() {
 
       <Text style={styles.registerText}>
 
-        Não tem uma conta ainda? <Text style={styles.link}>Registrar agora</Text>
+        Não tem uma conta ainda? <Text style={styles.link}> <Link href={'/register'}>Registrar agora </Link> </Text>
 
       </Text>
     </View>
