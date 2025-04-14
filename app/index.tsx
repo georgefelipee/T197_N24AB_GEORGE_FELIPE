@@ -148,7 +148,5 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#3498DB',
-
-    backgroundColor: 'white',
   }
 });
