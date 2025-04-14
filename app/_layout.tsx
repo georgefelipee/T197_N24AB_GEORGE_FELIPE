@@ -3,6 +3,7 @@ import * as React from 'react';
 import { AppRegistry } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { CustomTheme } from "./theme";
+import Toast from "react-native-toast-message";
 
 export default function RootLayout() {
   return (
@@ -11,7 +12,7 @@ export default function RootLayout() {
      <Stack.Screen name="index" options={{ headerShown: false }}  />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>;
-
+    <Toast/>
   </PaperProvider>
   )
 }

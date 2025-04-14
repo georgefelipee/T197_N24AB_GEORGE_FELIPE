@@ -3,6 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { TextInput, Button, Text, HelperText, ActivityIndicator } from 'react-native-paper';
+import { login } from './services/loginService';
+import Toast from 'react-native-toast-message';
 
 export default function Login() {
   const router = useRouter();
@@ -12,8 +14,7 @@ export default function Login() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleLogin = () => {
-
+  const handleLogin = async () => {
     setEmailError('');
     setPasswordError('');
 
@@ -27,14 +28,25 @@ export default function Login() {
       return;
     }
 
-
     setLoading(true);
-    
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/home/HomeDocuments"); 
 
-    }, 2000);
+    login(email, password).then(() => {
+      console.log("Login bem-sucedido!");
+      router.push('/home/HomeDocuments'); // Navega para a tela inicial após o login bem-sucedido
+    }
+    ).catch((error) => {
+      console.error("Erro ao fazer login:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao fazer login',
+        text2: 'Verifique seu email e senha e tente novamente.',
+        position: 'bottom',
+        visibilityTime: 3000,
+      })
+    }).finally(() => {
+      setLoading(false);
+    });
+
   };
 
   return (
@@ -77,7 +89,6 @@ export default function Login() {
         mode="contained" 
         onPress={handleLogin} 
         style={styles.button} 
-        loading={loading}
         labelStyle={styles.buttonLabel}
 
       >
