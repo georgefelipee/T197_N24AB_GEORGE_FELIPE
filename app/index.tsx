@@ -150,18 +150,5 @@ const styles = StyleSheet.create({
     color: '#3498DB',
 
     backgroundColor: 'white',
-  },
-  input: {
-    marginBottom: 12,
-  },
-  button: {
-    marginTop: 16,
-  },
-  registerText: {
-    textAlign: 'center',
-    marginTop: 12,
-  },
-  link: {
-    color: '#007bff',
   }
 });
