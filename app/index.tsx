@@ -43,6 +43,7 @@ export default function Login() {
 
       <Text style={styles.subtitle}>Insira seu email e sua senha para realizar o login</Text>
 
+
       <TextInput
         label="Email"
         value={email}
