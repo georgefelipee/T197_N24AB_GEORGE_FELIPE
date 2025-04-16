@@ -17,3 +17,4 @@ export async function login(email : string, senha : string) {
     const usuario = snapshot.docs[0].data();
     return usuario;
   }
+
