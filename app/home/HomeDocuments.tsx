@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import React, { useState } from 'react';
 import { TextInput, Button, Text, useTheme, Checkbox } from 'react-native-paper';
-import styles from '../style/HomeDocumentsStyles';
+import styles from '../../style/HomeDocumentsStyles';
 
 export default function HomeDocuments() {
   const [search, setSearch] = useState('');

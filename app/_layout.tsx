@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import * as React from 'react';
 import { AppRegistry } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
-import { CustomTheme } from "./theme";
+import { CustomTheme } from "../theme";
 import Toast from "react-native-toast-message";
 
 export default function RootLayout() {
