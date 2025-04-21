@@ -1,8 +1,7 @@
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
-import { styles } from './style/registerStyles'; // importação do estilo externo
 import {db} from '../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 
@@ -72,8 +71,8 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text >Cadastro</Text>
-      <Text >Crie a sua conta e continue</Text>
+      <Text style={styles.title}>Cadastro</Text>
+      <Text style={styles.subtitle}>Crie a sua conta e continue</Text>
       <TextInput
         label="Nome"
         value={nome}
@@ -128,9 +127,64 @@ export default function Register() {
         Cadastrar
       </Button>
 
-      <Text style={styles.loginText}>
-        Já tem uma conta? <Text style={styles.link} onPress={() => router.push('/')}>Entrar</Text>
-      </Text>
+
+      <View style={styles.footer}>
+        <Text>
+         Já tem uma conta?{' '}
+          <Text style={styles.link} onPress={() => router.push('/')}>
+            Entrar
+          </Text>
+        </Text>
+      </View>
+
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#212121',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#fff',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 40,
+    color: '#C0C0C0',
+  },
+  input: {
+    marginBottom: 10,
+    backgroundColor: '#212121',
+    borderWidth: 0.5,
+    borderColor: '#C0C0C0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 1,
+    color: '#fff',
+  },
+  button: {
+    marginTop: 24,
+    backgroundColor: '#3498DB',
+    borderRadius: 8,
+  },
+  buttonLabel: {
+    color: 'white',
+  },
+  footer: {
+    marginTop: 32,
+    alignItems: 'center',
+  },
+  link: {
+    color: '#3498DB',
+    fontWeight: 'bold',
+  },
+});
