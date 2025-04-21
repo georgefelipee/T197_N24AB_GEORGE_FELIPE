@@ -1,4 +1,4 @@
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
@@ -30,11 +30,16 @@ export default function Login() {
 
     setLoading(true);
 
-    login(email, password).then(() => {
+    login(email, password)
+    .then(async (usuario) => {
       console.log("Login bem-sucedido!");
-      router.push('/home/HomeDocuments'); // Navega para a tela inicial após o login bem-sucedido
-    }
-    ).catch((error) => {
+  
+      // Salva o usuário no AsyncStorage
+      await AsyncStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+  
+      router.push('/home/HomeDocuments');
+    })
+    .catch((error) => {
       console.error("Erro ao fazer login:", error);
       Toast.show({
         type: 'error',
@@ -43,7 +48,8 @@ export default function Login() {
         position: 'bottom',
         visibilityTime: 3000,
       })
-    }).finally(() => {
+    })
+    .finally(() => {
       setLoading(false);
     });
 

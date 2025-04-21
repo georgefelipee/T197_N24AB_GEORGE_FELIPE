@@ -72,6 +72,8 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
+      <Text >Cadastro</Text>
+      <Text >Crie a sua conta e continue</Text>
       <TextInput
         label="Nome"
         value={nome}

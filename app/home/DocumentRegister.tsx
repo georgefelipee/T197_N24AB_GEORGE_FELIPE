@@ -3,34 +3,90 @@ import { View, StyleSheet } from 'react-native';
 import { Text, TextInput, Button, HelperText, useTheme } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
+import { storage } from '@/firebaseConfig'; // Importando o Firebase Storage
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '@/firebaseConfig'; // Importando o Firestore
+import { collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Link, useRouter } from 'expo-router';
 
 export default function DocumentsRegister() {
+  const router = useRouter();
   const [documentName, setDocumentName] = useState('');
   const [documentType, setDocumentType] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [selectedFile, setSelectedFile] = useState<any>(null);
-
   const { colors } = useTheme();
-
-  const handleNext = () => {
+  
+  const handleNext = async () => {
     if (!documentName || !documentType || !description) {
       setError('Todos os campos são obrigatórios.');
       return;
     }
+  
+    if (!selectedFile) {
+      setError('Por favor, selecione um arquivo.');
+      return;
+    }
+  
     setError('');
-    // Lógica para avançar para o próximo passo
+  
+    try {
+      const json = await AsyncStorage.getItem('usuarioLogado');
+      const usuario = json ? JSON.parse(json) : null;
+      if (!usuario) {
+        setError('Usuário não autenticado');
+        return;
+      }
+  
+      const fileRef = ref(storage, `documents/${selectedFile.name}`);
+      const response = await fetch(selectedFile.uri);
+      const blob = await response.blob();
+      const uploadResult = await uploadBytes(fileRef, blob);
+
+
+      const fileURL = await getDownloadURL(uploadResult.ref);
+  
+      const docRef = await addDoc(collection(db, 'documents'), {
+        name: documentName,
+        type: documentType,
+        description,
+        fileURL,
+        userId: usuario.uid,
+        createdAt: new Date(),
+      });
+  
+      console.log('Documento registrado com sucesso! ID:', docRef.id);
+  
+      // Resetar campos
+      setDocumentName('');
+      setDocumentType('');
+      setDescription('');
+      setSelectedFile(null);
+      router.push('/home/HomeDocuments');
+    } catch (error) {
+      console.error('Erro ao registrar o documento:', error);
+      setError('Erro ao registrar o documento.');
+    }
   };
+  
 
   const pickDocument = async () => {
-  const result = await DocumentPicker.getDocumentAsync({});
-
-    console.log(result);
+    const result = await DocumentPicker.getDocumentAsync({});
   
-};
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const file = result.assets[0];
+      console.log('Arquivo selecionado:', file);
+      setSelectedFile(file);
+    }
+  };
+  
+  
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text variant="headlineMedium" style={styles.title}>
         Descreva os detalhes do documento
       </Text>
@@ -38,7 +94,7 @@ export default function DocumentsRegister() {
       <Button mode="outlined" style={styles.uploadButton} onPress={pickDocument}>
         Selecionar Arquivo
       </Button>
-
+      
       {selectedFile && (
         <Text style={styles.fileInfo}>
           Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
