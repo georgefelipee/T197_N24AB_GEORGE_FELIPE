@@ -2,8 +2,10 @@ import { View, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { TextInput, Button, Text, HelperText } from 'react-native-paper';
-import {db} from '../firebaseConfig';
+import { db } from '../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
+import Toast from 'react-native-toast-message';
+import { verificarEmailJaCadastrado } from './services/authService'; 
 
 export default function Register() {
   const router = useRouter();
@@ -39,40 +41,57 @@ export default function Register() {
     return Object.keys(novosErros).length === 0;
   };
 
-  const cadstrarUsusario = async () =>{
-
-    try{
-      await addDoc(collection(db,'usuarios'),{
+  const cadastrarUsuario = async () => {
+    try {
+      await addDoc(collection(db, 'usuarios'), {
         nome,
         email,
         telefone,
-        senha
-
+        senha,
       });
-      router.push('/'); // Volta para a tela inicial após cadastro
-    }catch(error){
-      console.error("Erro ao cadastrar usuário no Firebase:", error);
+      Toast.show({
+        type: 'success',
+        text1: 'Sucesso!',
+        text2: 'Usuário cadastrado com sucesso.',
+      });
+      router.push('/');
+    } catch (error: any) {
+      console.error("Erro ao cadastrar usuário:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao cadastrar',
+        text2: error.message || 'Tente novamente.',
+      });
     }
   };
 
   const handleCadastro = async () => {
     if (!validar()) return;
-  
-    try {
-      await cadstrarUsusario();
-      alert("Usuário cadastrado com sucesso!");
-      // ou Toast.show({ type: 'success', text1: 'Usuário cadastrado com sucesso!' });
-    } catch (error) {
-      alert("Erro ao cadastrar. Tente novamente.   ");
+
+    const emailExiste = await verificarEmailJaCadastrado(email);
+    if (emailExiste) {
+      setErros((prevErros) => ({
+        ...prevErros,
+        email: 'Este e-mail já está cadastrado',
+      }));
+
+      Toast.show({
+        type: 'error',
+        text1: 'Cadastro falhou',
+        text2: 'Este e-mail já está cadastrado.',
+      });
+
+      return;
     }
+
+    await cadastrarUsuario();
   };
-
-
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Cadastro</Text>
       <Text style={styles.subtitle}>Crie a sua conta e continue</Text>
+
       <TextInput
         label="Nome"
         value={nome}
@@ -88,6 +107,7 @@ export default function Register() {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        autoCorrect={false}
         style={styles.input}
         error={!!erros.email}
       />
@@ -108,6 +128,7 @@ export default function Register() {
         value={senha}
         onChangeText={setSenha}
         secureTextEntry
+        autoCorrect={false}
         style={styles.input}
         error={!!erros.senha}
       />
@@ -118,25 +139,24 @@ export default function Register() {
         value={confirmarSenha}
         onChangeText={setConfirmarSenha}
         secureTextEntry
+        autoCorrect={false}
         style={styles.input}
         error={!!erros.confirmarSenha}
       />
       <HelperText type="error" visible={!!erros.confirmarSenha}>{erros.confirmarSenha}</HelperText>
 
       <Button mode="contained" onPress={handleCadastro} style={styles.button}>
-        Cadastrar
+        Criar Conta
       </Button>
-
 
       <View style={styles.footer}>
         <Text>
-         Já tem uma conta?{' '}
+          Já tem uma conta?{' '}
           <Text style={styles.link} onPress={() => router.push('/')}>
             Entrar
           </Text>
         </Text>
       </View>
-
     </View>
   );
 }
@@ -175,9 +195,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
     backgroundColor: '#3498DB',
     borderRadius: 8,
-  },
-  buttonLabel: {
-    color: 'white',
   },
   footer: {
     marginTop: 32,

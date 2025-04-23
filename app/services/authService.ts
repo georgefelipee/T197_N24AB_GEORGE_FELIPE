@@ -18,3 +18,9 @@ export async function login(email : string, senha : string) {
     return usuario;
   }
 
+
+  export async function verificarEmailJaCadastrado(email: string): Promise<boolean> {
+    const q = query(collection(db, "usuarios"), where("email", "==", email));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty; // true se já existe usuário
+  }
