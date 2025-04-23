@@ -10,6 +10,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from 'expo-router';
+import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 
 export default function DocumentsRegister() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function DocumentsRegister() {
         createdAt: new Date(),
       });
   
-      console.log('Documento registrado com sucesso! ID:', docRef.id);
+      
   
       // Resetar campos
       setDocumentName('');
@@ -87,6 +88,7 @@ export default function DocumentsRegister() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+     
       <Text variant="headlineMedium" style={styles.title}>
         Descreva os detalhes do documento
       </Text>
