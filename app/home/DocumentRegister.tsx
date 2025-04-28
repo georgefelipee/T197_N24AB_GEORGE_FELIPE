@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import {
   Text,
   TextInput,
   Button,
   HelperText,
   useTheme,
+  IconButton,
 } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -35,7 +36,7 @@ export default function DocumentsRegister() {
 
   const [hasErrorsStep1, setHasErrorsStep1] = useState(true);
 
-  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
   const { colors } = useTheme();
 
   const onNextStep1 = () => {
@@ -44,7 +45,7 @@ export default function DocumentsRegister() {
       !values.documentName ||
       !values.documentType ||
       !values.description ||
-      !selectedFile
+      selectedFiles.length === 0 
     ) {
       setHasErrorsStep1(true);
     } else {
@@ -52,64 +53,66 @@ export default function DocumentsRegister() {
     }
   };
 
-  const handleSendDocumentes = async () => {
+  const handleSendDocuments = async () => {
     const { documentName, documentType, description } = getValues();
-
+  
     try {
       const json = await AsyncStorage.getItem("usuarioLogado");
       const usuario = json ? JSON.parse(json) : null;
-      if (!usuario) {
-        setHasErrorsStep1(true);
-        return;
+      if (!usuario || selectedFiles.length === 0) return;
+  
+      for (const file of selectedFiles) {
+        const fileRef = ref(storage, `documents/${file.name}`);
+        const response = await fetch(file.uri);
+        const blob = await response.blob();
+        const uploadResult = await uploadBytes(fileRef, blob);
+        const fileURL = await getDownloadURL(uploadResult.ref);
+  
+        await addDoc(collection(db, "documents"), {
+          name: documentName,
+          type: documentType,
+          description,
+          fileURL,
+          userId: usuario.uid,
+          createdAt: new Date(),
+        });
       }
-
-      if (!selectedFile) {
-        setHasErrorsStep1(true);
-        return;
-      }
-
-      const fileRef = ref(storage, `documents/${selectedFile.name}`);
-      const response = await fetch(selectedFile.uri);
-      const blob = await response.blob();
-      const uploadResult = await uploadBytes(fileRef, blob);
-
-      const fileURL = await getDownloadURL(uploadResult.ref);
-
-      await addDoc(collection(db, "documents"), {
-        name: documentName,
-        type: documentType,
-        description,
-        fileURL,
-        userId: usuario.uid,
-        createdAt: new Date(),
-      });
-
-      reset(); // reseta os valores do react-hook-form
-      setSelectedFile(null);
-
+  
+      reset();
+      setSelectedFiles([]);
+  
       Toast.show({
         type: "success",
-        text1: "Documento enviado com sucesso!",
+        text1: "Documentos enviados com sucesso!",
         position: "top",
       });
-
-      setHasErrorsStep1(false);
+  
       router.push("/home/HomeDocuments");
     } catch (error) {
-      console.error("Erro ao registrar o documento:", error);
-      setHasErrorsStep1(true);
+      console.error("Erro ao enviar documentos:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erro ao enviar documentos",
+      });
     }
   };
+  
 
   const pickDocument = async () => {
     const result = await DocumentPicker.getDocumentAsync({});
-
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const file = result.assets[0];
-      console.log("Arquivo selecionado:", file);
-      setSelectedFile(file);
+      setSelectedFiles(prev => [...prev, file]);
     }
   };
+
+  const removeDocument = (index: number) => {
+    const updatedFiles = [...selectedFiles];
+    updatedFiles.splice(index, 1);
+    setSelectedFiles(updatedFiles);
+  };
+  
+  
 
   const firstButtonNextDisabled = () => {
     const values = getValues();
@@ -117,7 +120,7 @@ export default function DocumentsRegister() {
       !values.documentName ||
       !values.documentType ||
       !values.description ||
-      !selectedFile
+      selectedFiles.length === 0 
     );
   }
 
@@ -170,7 +173,7 @@ export default function DocumentsRegister() {
                     ) {
                       const file = result.assets[0];
                       console.log("Arquivo selecionado:", file);
-                      setSelectedFile(file); // Atualiza o estado local
+                      setSelectedFiles(prev => [...prev, file]); // Atualiza o estado local
                       onChange(file); // Atualiza o estado do React Hook Form
                     }
                   }}
@@ -178,11 +181,11 @@ export default function DocumentsRegister() {
                   Selecionar Arquivo
                 </Button>
 
-                {selectedFile && (
-                  <Text style={styles.fileInfo}>
-                    Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
-                  </Text>
-                )}
+                {selectedFiles.length > 0 && selectedFiles.map((file, index) => (
+                <Text key={index} style={styles.fileInfo}>
+                  Arquivo {index + 1}: {file.name} ({file.size} bytes)
+                </Text>
+              ))}
 
                 {errors.selectedFile && (
                   <HelperText type="error">
@@ -278,14 +281,54 @@ export default function DocumentsRegister() {
           <Text variant="headlineMedium" style={styles.title}>
             Confirme os detalhes do documento
           </Text>
-          <Button
-            mode="contained"
-            onPress={handleSendDocumentes}
-            style={styles.nextButton}
-          >
-            Finalizar
+
+          {/* Exibindo a lista de documentos selecionados */}
+          {selectedFiles.length > 0 ? (
+            <FlatList
+              data={selectedFiles}
+              renderItem={({ item, index }) => (
+                <View style={styles.card}>
+                    <View style={styles.fileInfoContainer}>
+                      <Text style={styles.fileName}>{item.name}</Text>
+                      <Text style={styles.fileSize}>({(item.size / 1048576).toFixed(2)} MB)</Text>
+                    </View>
+                  <View style={styles.iconContainer}>
+                    <IconButton
+                      icon="trash-can"
+                      onPress={() => removeDocument(index)}
+                      size={20}
+                    />
+                  </View>
+                </View>
+              )}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          ) : (
+            <Text style={styles.noDocumentsText}>Nenhum documento selecionado.</Text>
+          )}
+
+          {/* Botão para adicionar mais documentos */}
+          <Button mode="outlined" onPress={pickDocument} style={styles.uploadButton2}>
+            Adicionar mais documentos
           </Button>
+
+          <View style={styles.buttonContainer}>
+            <Button mode="outlined" style={styles.nextButton} onPress={() => router.push("/")}>
+              Cancelar
+            </Button>
+
+            {/* Botão de enviar */}
+            <Button
+              mode="contained"
+              onPress={handleSendDocuments}
+              style={styles.nextButton}
+              disabled={selectedFiles.length === 0}
+            >
+              Enviar
+            </Button>
+          </View>
         </ProgressStep>
+
       </ProgressSteps>
     </View>
   );
@@ -297,6 +340,30 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
   },
+  card: {
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center", 
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  fileInfoContainer: {
+    flexDirection: "row", 
+    alignItems: "center", 
+  },
+  fileName: {
+    fontWeight: "bold", 
+    marginRight: 8,
+  },
+  fileSize: {
+    fontStyle: "italic", 
+  },
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
   title: {
     marginVertical: 20,
     fontSize: 20,
@@ -304,11 +371,24 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: "#C0C0C0",
   },
+  noDocumentsText: {
+    fontStyle: "italic",
+    color: "#888",
+  },
+
   uploadButton: {
     marginBottom: 16,
   },
+  uploadButton2: {
+    marginTop: 16,
+  },
   input: {
     marginBottom: 16,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
   },
   pickerContainer: {
     borderWidth: 1,
@@ -328,3 +408,4 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
 });
+
