@@ -142,27 +142,58 @@ export default function DocumentsRegister() {
       >
         <ProgressStep
           label="Detalhes do Documento"
+          buttonFillColor="#3498DB"
           buttonNextText="Próximo"
           buttonPreviousText="Voltar"
           buttonNextTextColor={colors.onSurface}
           onNext={onNextStep1}
           buttonNextDisabled={firstButtonNextDisabled()}
         >
-          <Text style={styles.title}>Descreva os detalhes do documento</Text>
+          <Controller
+            control={control}
+            name="selectedFile"
+            rules={{ required: "O arquivo é obrigatório." }}
+            render={({ field: { onChange } }) => (
+              <>
+                <Text style={styles.title}>
+                  Descreva os detalhes do documento
+                </Text>
+                <Button
+                  mode="outlined"
+                  style={styles.uploadButton}
+                  onPress={async () => {
+                    const result = await DocumentPicker.getDocumentAsync({});
+                    if (
+                      !result.canceled &&
+                      result.assets &&
+                      result.assets.length > 0
+                    ) {
+                      const file = result.assets[0];
+                      console.log("Arquivo selecionado:", file);
+                      setSelectedFile(file); // Atualiza o estado local
+                      onChange(file); // Atualiza o estado do React Hook Form
+                    }
+                  }}
+                >
+                  Selecionar Arquivo
+                </Button>
 
-          <Button
-            mode="outlined"
-            style={styles.uploadButton}
-            onPress={pickDocument}
-          >
-            Selecionar Arquivo
-          </Button>
+                {selectedFile && (
+                  <Text style={styles.fileInfo}>
+                    Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
+                  </Text>
+                )}
 
-          {selectedFile && (
-            <Text style={styles.fileInfo}>
-              Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
-            </Text>
-          )}
+                {errors.selectedFile && (
+                  <HelperText type="error">
+                    {typeof errors.selectedFile?.message === "string"
+                      ? errors.selectedFile.message
+                      : ""}
+                  </HelperText>
+                )}
+              </>
+            )}
+          />
 
           <Controller
             control={control}
@@ -233,12 +264,6 @@ export default function DocumentsRegister() {
               {typeof errors.description?.message === "string"
                 ? errors.description.message
                 : ""}
-            </HelperText>
-          )}
-
-          {hasErrorsStep1 && (
-            <HelperText type="error">
-              Preencha todos os campos obrigatórios e selecione um arquivo.
             </HelperText>
           )}
         </ProgressStep>
