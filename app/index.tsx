@@ -33,6 +33,9 @@ export default function Login() {
     login(email, password)
     .then(async (usuario) => {
       console.log("Login bem-sucedido!");
+
+       // Remove a senha direto no objeto usuario
+       delete usuario.password; 
   
       // Salva o usuário no AsyncStorage
       await AsyncStorage.setItem('usuarioLogado', JSON.stringify(usuario));

@@ -20,6 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
+import { IDocumento } from "../interfaces/IDocumento";
 
 export default function DocumentsRegister() {
   const router = useRouter();
@@ -58,56 +59,56 @@ export default function DocumentsRegister() {
     try {
       const json = await AsyncStorage.getItem("usuarioLogado");
       const usuario = json ? JSON.parse(json) : null;
+
       if (!usuario) {
-        setHasErrorsStep1(true);
+        console.error("Usuário não encontrado no AsyncStorage!");
         return;
       }
 
       if (!selectedFile) {
-        setHasErrorsStep1(true);
+        console.error("Nenhum arquivo selecionado!");
         return;
       }
 
-      const fileRef = ref(storage, `documents/${selectedFile.name}`);
       const response = await fetch(selectedFile.uri);
       const blob = await response.blob();
-      const uploadResult = await uploadBytes(fileRef, blob);
 
-      const fileURL = await getDownloadURL(uploadResult.ref);
+      // Agora vamos gerar o BASE64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result; // Aqui estará o base64 do arquivo
 
-      await addDoc(collection(db, "documents"), {
-        name: documentName,
-        type: documentType,
-        description,
-        fileURL,
-        userId: usuario.uid,
-        createdAt: new Date(),
-      });
+        const documentoData: IDocumento = {
+          nome: documentName,
+          categoria: documentType,
+          descriçao: description,
+          userEmail: usuario.email,
+        };
 
-      reset(); // reseta os valores do react-hook-form
-      setSelectedFile(null);
+        await addDoc(collection(db, "documents"), {
+          ...documentoData,
+          fileBase64: base64String, // Aqui adicionamos o Base64!
+          status: "AGUARDANDO",
+          createdAt: new Date(),
+        });
 
-      Toast.show({
-        type: "success",
-        text1: "Documento enviado com sucesso!",
-        position: "top",
-      });
+        reset(); // reseta os valores do react-hook-form
+        setSelectedFile(null);
 
-      setHasErrorsStep1(false);
-      router.push("/home/HomeDocuments");
+        Toast.show({
+          type: "success",
+          text1: "Documento enviado com sucesso!",
+          position: "top",
+        });
+
+        setHasErrorsStep1(false);
+        router.push("/home/HomeDocuments");
+      };
+
+      reader.readAsDataURL(blob);
     } catch (error) {
       console.error("Erro ao registrar o documento:", error);
       setHasErrorsStep1(true);
-    }
-  };
-
-  const pickDocument = async () => {
-    const result = await DocumentPicker.getDocumentAsync({});
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const file = result.assets[0];
-      console.log("Arquivo selecionado:", file);
-      setSelectedFile(file);
     }
   };
 
@@ -119,7 +120,7 @@ export default function DocumentsRegister() {
       !values.description ||
       !selectedFile
     );
-  }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -274,17 +275,14 @@ export default function DocumentsRegister() {
           buttonFillColor="#3498DB"
           buttonNextTextColor="#FFFFFF"
           buttonPreviousTextColor="#C0C0C0"
+          onNext={() => {
+            console.log("Next Step");
+          }}
+          onSubmit={handleSendDocumentes}
         >
           <Text variant="headlineMedium" style={styles.title}>
             Confirme os detalhes do documento
           </Text>
-          <Button
-            mode="contained"
-            onPress={handleSendDocumentes}
-            style={styles.nextButton}
-          >
-            Finalizar
-          </Button>
         </ProgressStep>
       </ProgressSteps>
     </View>

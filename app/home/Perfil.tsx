@@ -1,53 +1,121 @@
-import { View, Image } from 'react-native';
-import { TextInput, Button, Text, HelperText, ActivityIndicator, useTheme, Avatar } from 'react-native-paper';
-import React from 'react';
+import { View } from 'react-native';
+import { TextInput, Button, Avatar, IconButton } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { buscarUsuarioPorEmail } from '../services/perfilGetUserEmail'; // A função de buscar no Firebase
+import { atualizarUsuarioPorEmail } from '../services/perfilService'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Perfil() {
-  const { colors } = useTheme();
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false); // controla o olhinho
+
+  useEffect(() => {
+    const carregarDadosUsuario = async () => {
+      try {
+        // Apenas buscar o email do AsyncStorage
+        const usuarioString = await AsyncStorage.getItem('usuarioLogado');
+        if (usuarioString) {
+          const usuario = JSON.parse(usuarioString);
+          const usuarioEmail = usuario.email;
+          
+          console.log('Email encontrado no AsyncStorage:', usuarioEmail);
+          setEmail(usuarioEmail); // Definir o email diretamente aqui
+
+          // Buscar os dados completos do usuário no Firebase com base no email
+          const usuarioEncontrado = await buscarUsuarioPorEmail(usuarioEmail);
+
+          console.log('Usuário encontrado no Firebase:', usuarioEncontrado);
+
+          if (usuarioEncontrado) {
+            setNome(usuarioEncontrado.nome || '');
+            setTelefone(usuarioEncontrado.telefone || '');
+            setSenha(''); // Limpar o campo senha por segurança
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    };
+
+    carregarDadosUsuario();
+  }, []);
+
+  const handleSalvar = async () => {
+    try {
+      const sucesso = await atualizarUsuarioPorEmail(email, {
+        nome,
+        telefone,
+        senha: senha || undefined, // só envia senha se for preenchida
+      });
+
+      if (sucesso) {
+        alert('Perfil atualizado com sucesso!');
+        setSenha(''); // limpa o campo senha por segurança
+      } else {
+        alert('Falha ao atualizar perfil.');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error);
+      alert('Erro ao salvar alterações.');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      
-      {/* Foto do usuário - circulo */}
       <Avatar.Image 
         size={150}
-        source={{ uri: 'https://www.example.com/imagem-do-usuario.jpg' }} // Caminho da imagem do usuário
+        source={{ uri: 'https://www.example.com/imagem-do-usuario.jpg' }} // A URL de exemplo
         style={styles.avatar}
       />
 
-      {/* Botão Editar alinhado à direita e com fundo cinza */}
       <Button
         mode="contained"
         compact
         style={styles.button}
+        onPress={handleSalvar}
       >
-        Editar
+        Salvar
       </Button>
 
-      {/* Campos de entrada */}
       <TextInput
         label="Nome"
+        value={nome}
+        onChangeText={setNome}
         style={styles.input}
       />
       <TextInput
         label="Email"
+        value={email}
+        onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
         style={styles.input}
-        disabled
       />
       <TextInput
         label="Telefone"
+        value={telefone}
+        onChangeText={setTelefone}
         keyboardType="phone-pad"
         style={styles.input}
-        disabled
       />
-      <TextInput
-        label="Senha"
-        secureTextEntry
-        style={styles.input}
-      />
+      <View style={styles.senhaContainer}>
+        <TextInput
+          label="Password"  // Mudado de "Senha" para "Password"
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry={!mostrarSenha}
+          style={[styles.input, { flex: 1 }]}
+        />
+        <IconButton
+          icon={mostrarSenha ? 'eye-off' : 'eye'}
+          onPress={() => setMostrarSenha(!mostrarSenha)}
+          style={styles.eyeButton}
+        />
+      </View>
     </View>
   );
 }
@@ -57,11 +125,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#212121', // Alteração do fundo para cinza
+    backgroundColor: '#212121',
   },
   avatar: {
-    alignSelf: 'center', // Centraliza a foto do usuário
-    marginBottom: 20, // Espaçamento abaixo da foto
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   input: {
     marginBottom: 10,
@@ -75,20 +143,19 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 24,
-    backgroundColor: '#B0B0B0', // Mudança do fundo para cinza
+    backgroundColor: '#B0B0B0',
     borderRadius: 8,
-    alignSelf: 'flex-end', // Alinha o botão à direita
-    paddingHorizontal: 16, // Ajusta o padding do botão
+    alignSelf: 'flex-end',
+    paddingHorizontal: 16,
   },
-  buttonLabel: {
-    color: 'white',
-  },
-  footer: {
-    marginTop: 32,
+  senhaContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
-  link: {
-    color: '#3498DB',
-    fontWeight: 'bold',
+  eyeButton: {
+    marginLeft: 5,
+    backgroundColor: '#424242',
+    borderRadius: 50,
   },
 });
