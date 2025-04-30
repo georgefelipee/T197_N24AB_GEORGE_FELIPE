@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
-import { IDocumento } from "../interfaces/IDocumento";
+import { IDocumento, TipoDocumento } from "../interfaces/IDocumento";
 
 export default function DocumentsRegister() {
   const router = useRouter();
@@ -122,6 +122,7 @@ export default function DocumentsRegister() {
     );
   };
 
+  const documentTypes = TipoDocumento.tipoDocumentoValues || [];
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ProgressSteps
@@ -229,9 +230,10 @@ export default function DocumentsRegister() {
                   onValueChange={onChange}
                   style={styles.picker}
                 >
-                  <Picker.Item label="Selecione o tipo do documento" value="" />
-                  <Picker.Item label="Categoria 1" value="Categoria 1" />
-                  <Picker.Item label="Categoria 2" value="Categoria 2" />
+                  <Picker.Item label="Selecione um tipo" value="" />
+                  {documentTypes.map((type) => (
+                    <Picker.Item key={type} label={type} value={type} />
+                  ))}
                 </Picker>
               </View>
             )}
