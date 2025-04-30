@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import { View, StyleSheet, FlatList } from "react-native";
@@ -22,6 +22,12 @@ import { Link, useRouter } from "expo-router";
 import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
 
+// Tipagem do ref
+interface ProgressStepsWithRefProps {
+  // Definindo que o ref será do tipo ProgressSteps
+  goBack?: () => void;
+}
+
 export default function DocumentsRegister() {
   const router = useRouter();
   const {
@@ -35,21 +41,33 @@ export default function DocumentsRegister() {
   });
 
   const [hasErrorsStep1, setHasErrorsStep1] = useState(true);
-
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  const [activeStep, setActiveStep] = useState(0); 
   const { colors } = useTheme();
 
+  const handleGoBack = () => {
+    const activeStepNum = activeStep - 1 < 0 ? 0 :  activeStep 
+      setActiveStep(activeStepNum);
+      reset()
+      setSelectedFile(null)
+    
+  };
+
   const onNextStep1 = () => {
+    console.log("acitv",activeStep)
     const values = getValues();
     if (
       !values.documentName ||
       !values.documentType ||
       !values.description ||
-      selectedFiles.length === 0 
-    ) {
+      !selectedFile 
+    ) 
+    {
       setHasErrorsStep1(true);
     } else {
       setHasErrorsStep1(false);
+   
     }
   };
 
@@ -61,25 +79,25 @@ export default function DocumentsRegister() {
       const usuario = json ? JSON.parse(json) : null;
       if (!usuario || selectedFiles.length === 0) return;
   
-      for (const file of selectedFiles) {
-        const fileRef = ref(storage, `documents/${file.name}`);
-        const response = await fetch(file.uri);
-        const blob = await response.blob();
-        const uploadResult = await uploadBytes(fileRef, blob);
-        const fileURL = await getDownloadURL(uploadResult.ref);
+      // // for (const file of selectedFiles) {
+      // //   const fileRef = ref(storage, `documents/${file.name}`);
+      // //   const response = await fetch(file.uri);
+      // //   const blob = await response.blob();
+      // //   const uploadResult = await uploadBytes(fileRef, blob);
+      // //   const fileURL = await getDownloadURL(uploadResult.ref);
   
-        await addDoc(collection(db, "documents"), {
-          name: documentName,
-          type: documentType,
-          description,
-          fileURL,
-          userId: usuario.uid,
-          createdAt: new Date(),
-        });
-      }
+      // //   await addDoc(collection(db, "documents"), {
+      // //     name: documentName,
+      // //     type: documentType,
+      // //     description,
+      // //     fileURL,
+      // //     userId: usuario.uid,
+      // //     createdAt: new Date(),
+      // //   });
+      // // }
   
-      reset();
-      setSelectedFiles([]);
+      // reset();
+      // setSelectedFiles([]);
   
       Toast.show({
         type: "success",
@@ -106,11 +124,11 @@ export default function DocumentsRegister() {
     }
   };
 
-  const removeDocument = (index: number) => {
-    const updatedFiles = [...selectedFiles];
-    updatedFiles.splice(index, 1);
-    setSelectedFiles(updatedFiles);
-  };
+  // const removeDocument = (index: number) => {
+  //   const updatedFiles = [...selectedFiles];
+  //   updatedFiles.splice(index, 1);
+  //   setSelectedFiles(updatedFiles);
+  // };
   
   
 
@@ -120,7 +138,7 @@ export default function DocumentsRegister() {
       !values.documentName ||
       !values.documentType ||
       !values.description ||
-      selectedFiles.length === 0 
+      !selectedFile
     );
   }
 
@@ -142,6 +160,7 @@ export default function DocumentsRegister() {
         disabledStepIconColor={colors.surfaceVariant}
         labelColor={colors.outline}
         marginBottom={0}
+        activeStep={activeStep}
       >
         <ProgressStep
           label="Detalhes do Documento"
@@ -173,7 +192,7 @@ export default function DocumentsRegister() {
                     ) {
                       const file = result.assets[0];
                       console.log("Arquivo selecionado:", file);
-                      setSelectedFiles(prev => [...prev, file]); // Atualiza o estado local
+                      setSelectedFile(file); // Atualiza o estado local
                       onChange(file); // Atualiza o estado do React Hook Form
                     }
                   }}
@@ -181,11 +200,11 @@ export default function DocumentsRegister() {
                   Selecionar Arquivo
                 </Button>
 
-                {selectedFiles.length > 0 && selectedFiles.map((file, index) => (
-                <Text key={index} style={styles.fileInfo}>
-                  Arquivo {index + 1}: {file.name} ({file.size} bytes)
-                </Text>
-              ))}
+                {selectedFile && (
+                  <Text style={styles.fileInfo}>
+                    Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
+                  </Text>
+                )}
 
                 {errors.selectedFile && (
                   <HelperText type="error">
@@ -289,13 +308,13 @@ export default function DocumentsRegister() {
               renderItem={({ item, index }) => (
                 <View style={styles.card}>
                     <View style={styles.fileInfoContainer}>
-                      <Text style={styles.fileName}>{item.name}</Text>
+                      <Text style={styles.fileName}>{getValues("documentName")}</Text>
                       <Text style={styles.fileSize}>({(item.size / 1048576).toFixed(2)} MB)</Text>
                     </View>
                   <View style={styles.iconContainer}>
                     <IconButton
                       icon="trash-can"
-                      onPress={() => removeDocument(index)}
+                      // onPress={() => removeDocument(index)}
                       size={20}
                     />
                   </View>
@@ -308,25 +327,9 @@ export default function DocumentsRegister() {
           )}
 
           {/* Botão para adicionar mais documentos */}
-          <Button mode="outlined" onPress={pickDocument} style={styles.uploadButton2}>
+          <Button mode="outlined" onPress={handleGoBack} style={styles.uploadButton2}>
             Adicionar mais documentos
           </Button>
-
-          <View style={styles.buttonContainer}>
-            <Button mode="outlined" style={styles.nextButton} onPress={() => router.push("/")}>
-              Cancelar
-            </Button>
-
-            {/* Botão de enviar */}
-            <Button
-              mode="contained"
-              onPress={handleSendDocuments}
-              style={styles.nextButton}
-              disabled={selectedFiles.length === 0}
-            >
-              Enviar
-            </Button>
-          </View>
         </ProgressStep>
 
       </ProgressSteps>
