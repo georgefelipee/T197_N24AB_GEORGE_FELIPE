@@ -2,7 +2,7 @@ import { collection, query, where, getDocs, updateDoc, DocumentReference } from 
 import { db } from "@/firebaseConfig";
 
 // Definição da interface para os dados do usuário com todos os campos opcionais
-interface Usuario {
+export interface Usuario {
   nome?: string;
   telefone?: string;
   email?: string;

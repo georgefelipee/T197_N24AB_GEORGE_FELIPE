@@ -15,6 +15,7 @@ export default function Register() {
   const [telefone, setTelefone] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const [erros, setErros] = useState({
     nome: '',
@@ -127,10 +128,17 @@ export default function Register() {
         label="Senha"
         value={senha}
         onChangeText={setSenha}
-        secureTextEntry
+        secureTextEntry={!mostrarSenha}
         autoCorrect={false}
         style={styles.input}
         error={!!erros.senha}
+        right={  
+          <TextInput.Icon
+            icon={mostrarSenha ? 'eye-off' : 'eye'}
+            onPress={() => setMostrarSenha(!mostrarSenha)}
+            forceTextInputFocus={false}
+          />
+        }
       />
       <HelperText type="error" visible={!!erros.senha}>{erros.senha}</HelperText>
 
@@ -138,10 +146,17 @@ export default function Register() {
         label="Confirmar Senha"
         value={confirmarSenha}
         onChangeText={setConfirmarSenha}
-        secureTextEntry
+        secureTextEntry={!mostrarSenha}
         autoCorrect={false}
         style={styles.input}
         error={!!erros.confirmarSenha}
+        right={  
+          <TextInput.Icon
+            icon={mostrarSenha ? 'eye-off' : 'eye'}
+            onPress={() => setMostrarSenha(!mostrarSenha)}
+            forceTextInputFocus={false}
+          />
+        }
       />
       <HelperText type="error" visible={!!erros.confirmarSenha}>{erros.confirmarSenha}</HelperText>
 
