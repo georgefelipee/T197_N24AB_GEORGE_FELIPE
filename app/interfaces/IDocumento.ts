@@ -1,4 +1,5 @@
 export interface IDocumento {
+    id?: string;
     nome: string;
     status?: StatusKey ;
     categoria: TipoDocumento.TipoDocumentoValue ;

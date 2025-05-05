@@ -17,7 +17,7 @@ export async function getAllDocumentsByEmail(email: string): Promise<IDocumento[
       nome: data.nome || "",
       status: data.status || "",
       categoria: data.categoria || "",
-      descriçao: data.descriçao || "",
+      descricao: data.descriçao || "", 
       userEmail: data.userEmail || "",
       fileBase64: data.fileBase64 || "",    
       createdAt: data.createdAt ? data.createdAt.toDate() : null, 

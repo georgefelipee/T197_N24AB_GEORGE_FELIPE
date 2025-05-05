@@ -31,7 +31,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
            <Text>Descrição: {item.descricao}</Text>
            <View style={styles.actions}>
              <IconButton icon="pencil" onPress={() => {}} />
-             <IconButton icon="delete" onPress={() => {}} />
+             <IconButton icon="delete" onPress={() => { console.log(item.id)}} />
            </View>
          </View>
        )}

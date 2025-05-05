@@ -81,7 +81,7 @@ export default function DocumentsRegister() {
         const documentoData: IDocumento = {
           nome: documentName,
           categoria: documentType,
-          descriçao: description,
+          descricao: description,
           userEmail: usuario.email,
         };
 
