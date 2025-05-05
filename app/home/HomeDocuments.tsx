@@ -6,6 +6,7 @@ import { getAllDocumentsByEmail } from '../services/documentService';
 import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DocumentCard from '../components/DocumentCard';
+import GlobalFAB from '../components/GlobalFAB';
 
 
 export default function HomeDocuments() {
@@ -114,6 +115,8 @@ export default function HomeDocuments() {
         contentContainerStyle={{ paddingBottom: 100 }}
         ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhum documento encontrado.</Text>}
       />
+      
+            <GlobalFAB /> {/* Adiciona o FAB global */}      
     </View>
   );
 }
