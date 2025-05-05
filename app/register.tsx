@@ -5,7 +5,7 @@ import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { db } from '../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
-import { verificarEmailJaCadastrado } from './services/authService'; 
+import { registrarUsuario } from './services/authService';
 
 export default function Register() {
   const router = useRouter();
@@ -68,24 +68,39 @@ export default function Register() {
 
   const handleCadastro = async () => {
     if (!validar()) return;
-
-    const emailExiste = await verificarEmailJaCadastrado(email);
-    if (emailExiste) {
-      setErros((prevErros) => ({
-        ...prevErros,
-        email: 'Este e-mail já está cadastrado',
-      }));
-
+  
+    try {
+      await registrarUsuario(email, senha); // cria usuário no Firebase Auth
+  
+      // salva dados adicionais no Firestore
+      await addDoc(collection(db, 'usuarios'), { nome, email, telefone });
+  
       Toast.show({
-        type: 'error',
-        text1: 'Cadastro falhou',
-        text2: 'Este e-mail já está cadastrado.',
+        type: 'success',
+        text1: 'Sucesso!',
+        text2: 'Usuário cadastrado com sucesso.',
       });
-
-      return;
+  
+      router.push('/'); // ou para tela de login
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        setErros((prevErros) => ({
+          ...prevErros,
+          email: 'Este e-mail já está cadastrado',
+        }));
+        Toast.show({
+          type: 'error',
+          text1: 'Erro no cadastro',
+          text2: 'Este e-mail já está cadastrado.',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro no cadastro',
+          text2: error.message || 'Tente novamente.',
+        });
+      }
     }
-
-    await cadastrarUsuario();
   };
 
   return (
