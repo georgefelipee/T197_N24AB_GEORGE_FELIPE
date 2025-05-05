@@ -59,6 +59,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: '#ccc',
     paddingTop: 10,
+    flex:1,
+    flexDirection: 'column',
+    gap: 10,
   },
   actions: {
     flexDirection: 'row',
