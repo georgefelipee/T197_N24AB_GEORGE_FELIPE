@@ -47,8 +47,8 @@ export default function DocumentsRegister() {
   const { colors } = useTheme();
 
   const handleGoBack = () => {
-    const activeStepNum = activeStep - 1 < 0 ? 0 :  activeStep 
-      setActiveStep(activeStepNum);
+    // const activeStepNum = activeStep - 1 < 0 ? 0 :  activeStep 
+      setActiveStep(0);
       reset()
       setSelectedFile(null)
     
@@ -67,9 +67,18 @@ export default function DocumentsRegister() {
       setHasErrorsStep1(true);
     } else {
       setHasErrorsStep1(false);
-   
+      setActiveStep(1)
+      const documents = {
+        name: values.documentName,
+        type: values.documentType,
+        description: values.description,
+        size:(selectedFile.size).toFixed(2)
+      };
+
+      setSelectedFiles([...selectedFiles, documents]);
     }
   };
+  console.log(selectedFile)
 
   const handleSendDocuments = async () => {
     const { documentName, documentType, description } = getValues();
@@ -124,11 +133,11 @@ export default function DocumentsRegister() {
     }
   };
 
-  // const removeDocument = (index: number) => {
-  //   const updatedFiles = [...selectedFiles];
-  //   updatedFiles.splice(index, 1);
-  //   setSelectedFiles(updatedFiles);
-  // };
+  const removeDocument = (index: number) => {
+    const updatedFiles = [...selectedFiles];
+    updatedFiles.splice(index, 1);
+    setSelectedFiles(updatedFiles);
+  };
   
   
 
@@ -202,7 +211,7 @@ export default function DocumentsRegister() {
 
                 {selectedFile && (
                   <Text style={styles.fileInfo}>
-                    Arquivo: {selectedFile.name} ({selectedFile.size} bytes)
+                    Arquivo: {selectedFile.name} ({(selectedFile.size / 1048576).toFixed(2)} MB)
                   </Text>
                 )}
 
@@ -308,13 +317,13 @@ export default function DocumentsRegister() {
               renderItem={({ item, index }) => (
                 <View style={styles.card}>
                     <View style={styles.fileInfoContainer}>
-                      <Text style={styles.fileName}>{getValues("documentName")}</Text>
+                      <Text style={styles.fileName}>{item.name}</Text>
                       <Text style={styles.fileSize}>({(item.size / 1048576).toFixed(2)} MB)</Text>
                     </View>
                   <View style={styles.iconContainer}>
                     <IconButton
                       icon="trash-can"
-                      // onPress={() => removeDocument(index)}
+                      onPress={() => removeDocument(index)}
                       size={20}
                     />
                   </View>
