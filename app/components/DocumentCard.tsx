@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
 import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
+import { handleDeleteDocument } from '../services/documentService';
 
 interface DocumentCardProps {
   item: IDocumento;
@@ -11,6 +12,11 @@ interface DocumentCardProps {
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
  const [expanded, setExpanded] = useState(false);
+
+ const deletarDocumento = async () => {
+  await handleDeleteDocument(item.id);
+  
+}
   return (
     <Card style={styles.card}>
       <TouchableOpacity>
@@ -31,7 +37,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
            <Text>Descrição: {item.descricao}</Text>
            <View style={styles.actions}>
              <IconButton icon="pencil" onPress={() => {}} />
-             <IconButton icon="delete" onPress={() => { console.log(item.id)}} />
+             <IconButton icon="delete" onPress={deletarDocumento} />
            </View>
          </View>
        )}
