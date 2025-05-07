@@ -23,7 +23,7 @@ export async function getAllDocumentsByEmail(
       nome: data.nome || '',
       status: data.status || '',
       categoria: data.categoria || '',
-      descricao: data.descriçao || '',
+      descricao: data.descricao || '',
       userEmail: data.userEmail || '',
       fileBase64: data.fileBase64 || '',
       createdAt: data.createdAt ? data.createdAt.toDate() : null,

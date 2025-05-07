@@ -21,7 +21,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
+
 import { IDocumento } from "../interfaces/IDocumento";
+
+import { TipoDocumento } from "../interfaces/IDocumento";
 
 // Tipagem do ref
 interface ProgressStepsWithRefProps {
@@ -46,6 +49,8 @@ export default function DocumentsRegister() {
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
   const [activeStep, setActiveStep] = useState(0); 
   const { colors } = useTheme();
+
+  const documentTypes = TipoDocumento.tipoDocumentoValues || [];
 
   const handleGoBack = () => {
     // const activeStepNum = activeStep - 1 < 0 ? 0 :  activeStep 
@@ -288,17 +293,18 @@ export default function DocumentsRegister() {
             rules={{ required: "Selecione um tipo de documento." }}
             render={({ field: { onChange, value } }) => (
               <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={value}
-                  onValueChange={onChange}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Selecione o tipo do documento" value="" />
-                  <Picker.Item label="Categoria 1" value="Categoria 1" />
-                  <Picker.Item label="Categoria 2" value="Categoria 2" />
-                </Picker>
-              </View>
-            )}
+              <Picker
+                selectedValue={value}
+                onValueChange={onChange}
+                style={styles.picker}
+              >
+                <Picker.Item label="Selecione um tipo" value="" />
+                {documentTypes.map((type) => (
+                  <Picker.Item key={type} label={type} value={type} />
+                ))}
+              </Picker>
+            </View>
+          )}
           />
           {errors.documentType && (
             <HelperText type="error">
