@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-
+import { useNavigation } from '@react-navigation/native'; 
 import { View, StyleSheet, FlatList } from "react-native";
 import {
   Text,
@@ -33,6 +33,7 @@ interface ProgressStepsWithRefProps {
 }
 
 export default function DocumentsRegister() {
+  const navigation = useNavigation();
   const router = useRouter();
   const {
     control,
@@ -192,6 +193,15 @@ export default function DocumentsRegister() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
+        <IconButton 
+          icon="arrow-left"
+          onPress={() => router.push('/home/HomeDocuments')}
+          size={24}
+          style={styles.backButton}
+        />
+        <Text style={styles.headerTitle}>Cadastro de Documentos</Text>
+      </View>
       <ProgressSteps
         activeStepIconBorderColor={colors.primary}
         activeLabelColor={colors.onSurface}
@@ -459,6 +469,19 @@ const styles = StyleSheet.create({
   fileInfo: {
     marginBottom: 16,
     fontStyle: "italic",
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
 

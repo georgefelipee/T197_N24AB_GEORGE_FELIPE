@@ -13,6 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const handleLogin = async () => {
     setEmailError('');
@@ -33,6 +34,9 @@ export default function Login() {
     login(email, password)
     .then(async (usuario) => {
       console.log("Login bem-sucedido!");
+
+       // Remove a senha direto no objeto usuario
+       delete usuario.password; 
   
       // Salva o usuário no AsyncStorage
       await AsyncStorage.setItem('usuarioLogado', JSON.stringify(usuario));
@@ -81,11 +85,17 @@ export default function Login() {
         label="Senha"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
+        secureTextEntry={!mostrarSenha}
         style={styles.input}
         error={!!passwordError}
         outlineColor="#C0C0C0" 
-
+          right={  
+            <TextInput.Icon
+              icon={mostrarSenha ? 'eye-off' : 'eye'}
+              onPress={() => setMostrarSenha(!mostrarSenha)}
+              forceTextInputFocus={false}
+            />
+          }
 
       />
       <HelperText type="error" visible={!!passwordError}>
