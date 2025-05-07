@@ -1,6 +1,6 @@
-import { View, FlatList, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { TextInput, Button, Text, useTheme, Checkbox, IconButton, Avatar, Card } from 'react-native-paper';
+import { FlatList, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TextInput, Button, Text, useTheme, Checkbox } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
 import { getAllDocumentsByEmail } from '../services/documentService';
 import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
@@ -12,11 +12,17 @@ import GlobalFAB from '../components/GlobalFAB';
 export default function HomeDocuments() {
   const [search, setSearch] = useState('');
   const [showStatusOptions, setShowStatusOptions] = useState(false);
+
+  const [checked1, setChecked1] = useState(false);
+  const [checked2, setChecked2] = useState(false);
+
+  const { colors } = useTheme();
+
+
   const [checkedAprovado, setCheckedAprovado] = useState(false);
   const [checkedAguardando, setCheckedAguardando] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [documentos, setDocumentos] = useState<IDocumento[]>([]);
-  const { colors } = useTheme();
 
   const buscarDocumentos = async (email: string) => {
     try {
@@ -86,25 +92,25 @@ export default function HomeDocuments() {
       </View>
 
       {showStatusOptions && (
-        <View style={styles.filtersContainer}>
-          <View style={styles.filterRow}>
+        <View style={{ backgroundColor: 'rgba(44, 44, 44, 1)', marginTop: 16, padding: 10, borderRadius: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Checkbox
-              status={checkedAprovado ? 'checked' : 'unchecked'}
-              onPress={() => setCheckedAprovado(!checkedAprovado)}
+              status={checked1 ? 'checked' : 'unchecked'}
+              onPress={() => setChecked1(!checked1)}
             />
-            <Text style={styles.filterText}>Documento Aprovado</Text>
+            <Text style={{ fontSize: 14 }}>Documento Aprovado</Text>
           </View>
 
-          <View style={styles.filterRow}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Checkbox
-              status={checkedAguardando ? 'checked' : 'unchecked'}
-              onPress={() => setCheckedAguardando(!checkedAguardando)}
+              status={checked2 ? 'checked' : 'unchecked'}
+              onPress={() => setChecked2(!checked2)}
             />
-            <Text style={styles.filterText}>Documento Aguardando</Text>
+            <Text style={{ fontSize: 14 }}>Documento Pendente</Text>
           </View>
 
-          <Button mode="outlined" compact onPress={() => {}}>
-            Aplicar
+          <Button mode="outlined" compact onPress={() => console.log('Filtrar')}>
+            Filtrar
           </Button>
         </View>
       )}

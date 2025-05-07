@@ -1,157 +1,53 @@
-import { View } from 'react-native';
-import { TextInput, Button, Avatar, IconButton } from 'react-native-paper';
-import React, { useEffect, useState } from 'react';
+import { View, Image } from 'react-native';
+import { TextInput, Button, Text, HelperText, ActivityIndicator, useTheme, Avatar } from 'react-native-paper';
+import React from 'react';
 import { StyleSheet } from 'react-native';
-import { buscarUsuarioPorEmail } from '../services/perfilGetUserEmail'; // A função de buscar no Firebase
-import { atualizarUsuarioPorEmail } from '../services/perfilService'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Usuario } from '../services/perfilService';
 
 export default function Perfil() {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [senha, setSenha] = useState('');
-  const [mostrarSenha, setMostrarSenha] = useState(false); // controla o olhinho
-
-  useEffect(() => {
-    const carregarDadosUsuario = async () => {
-      try {
-        // Apenas buscar o email do AsyncStorage
-        const usuarioString = await AsyncStorage.getItem('usuarioLogado');
-        if (usuarioString) {
-          const usuario = JSON.parse(usuarioString);
-          const usuarioEmail = usuario.email;
-          
-          console.log('Email encontrado no AsyncStorage:', usuarioEmail);
-          setEmail(usuarioEmail); // Definir o email diretamente aqui
-
-          // Buscar os dados completos do usuário no Firebase com base no email
-          const usuarioEncontrado = await buscarUsuarioPorEmail(usuarioEmail);
-
-          console.log('Usuário encontrado no Firebase:', usuarioEncontrado);
-
-          if (usuarioEncontrado) {
-            setNome(usuarioEncontrado.nome || '');
-            setTelefone(usuarioEncontrado.telefone || '');
-            setSenha(usuarioEncontrado.senha || '');
-
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-      }
-    };
-
-    carregarDadosUsuario();
-  }, []);
-
-  const atualizarCampo = async (campo: keyof Usuario, valor: string) => {
-    try {
-      const sucesso = await atualizarUsuarioPorEmail(email, {
-        [campo]: valor,
-      });
-  
-      if (sucesso) {
-        alert(`${campo} atualizado com sucesso!`);
-      } else {
-        alert(`Falha ao atualizar ${campo}.`);
-      }
-    } catch (error) {
-      console.error(`Erro ao atualizar ${campo}:`, error);
-      alert('Erro ao salvar alterações.');
-    }
-  };
-  
+  const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
+      
       {/* Foto do usuário - circulo */}
-      <Avatar.Icon
+      <Avatar.Image 
         size={150}
-        icon="account" // Caminho da imagem do usuário
+        source={{ uri: 'https://www.example.com/imagem-do-usuario.jpg' }} // Caminho da imagem do usuário
         style={styles.avatar}
       />
 
-      <View style={styles.inputRow}>
-        <TextInput
-          label="Nome"
-          value={nome}
-          onChangeText={setNome}
-          style={styles.input}
-        />
-        <Button
-          mode="contained"
-          onPress={() => atualizarCampo('nome', nome)}
-          style={styles.button}
-        >
-          Editar
-        </Button>
-      </View>
+      {/* Botão Editar alinhado à direita e com fundo cinza */}
+      <Button
+        mode="contained"
+        compact
+        style={styles.button}
+      >
+        Editar
+      </Button>
 
-
-      <View style={styles.inputRow}>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-        />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('email', email)}
-        >
-          Editar
-        </Button>
-      </View>
-
-      <View style={styles.inputRow}>
-        <TextInput
-          label="Telefone"
-          value={telefone}
-          onChangeText={setTelefone}
-          keyboardType="phone-pad"
-          style={[styles.input, { flex: 1 }]}
-        />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('telefone', telefone)}
-        >
-          Editar
-        </Button>
-      </View>
-
-      <View style={styles.inputRow}>
-        <TextInput
-          label="Password"
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry={!mostrarSenha}
-          style={[styles.input, { flex: 1 }]}
-          right={
-            <TextInput.Icon
-              icon={mostrarSenha ? 'eye-off' : 'eye'}
-              onPress={() => setMostrarSenha(!mostrarSenha)}
-              forceTextInputFocus={false}
-            />
-          }
-        />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('senha', senha)}
-        >
-          Editar
-        </Button>
-      </View>
-
+      {/* Campos de entrada */}
+      <TextInput
+        label="Nome"
+        style={styles.input}
+      />
+      <TextInput
+        label="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        style={styles.input}
+        disabled
+      />
+      <TextInput
+        label="Telefone"
+        keyboardType="phone-pad"
+        style={styles.input}
+        disabled
+      />
+      <TextInput
+        label="Senha"
+        secureTextEntry
+        style={styles.input}
+      />
     </View>
   );
 }
@@ -161,33 +57,38 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#212121',
+    backgroundColor: '#212121', // Alteração do fundo para cinza
   },
   avatar: {
-    alignSelf: 'center',
-    marginBottom: 20,
-    backgroundColor: '#B0B0B0'
+    alignSelf: 'center', // Centraliza a foto do usuário
+    marginBottom: 20, // Espaçamento abaixo da foto
   },
   input: {
-    flex: 1,
+    marginBottom: 10,
     backgroundColor: '#212121',
     borderWidth: 0.5,
     borderColor: '#C0C0C0',
     borderRadius: 8,
-    marginRight: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 1,
     color: '#fff',
-    height: 50, // altura fixa
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10
   },
   button: {
-    backgroundColor: '#B0B0B0',
+    marginTop: 24,
+    backgroundColor: '#B0B0B0', // Mudança do fundo para cinza
     borderRadius: 8,
-    height: 50, // mesma altura do input
-    paddingHorizontal: 16,
-    justifyContent: 'center',
+    alignSelf: 'flex-end', // Alinha o botão à direita
+    paddingHorizontal: 16, // Ajusta o padding do botão
+  },
+  buttonLabel: {
+    color: 'white',
+  },
+  footer: {
+    marginTop: 32,
+    alignItems: 'center',
+  },
+  link: {
+    color: '#3498DB',
+    fontWeight: 'bold',
   },
 });
