@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
+import { IDocumento } from "../interfaces/IDocumento";
 
 // Tipagem do ref
 interface ProgressStepsWithRefProps {
@@ -54,8 +55,7 @@ export default function DocumentsRegister() {
     
   };
 
-  const onNextStep1 = () => {
-    console.log("acitv",activeStep)
+  const onNextStep1 = async () => {
     const values = getValues();
     if (
       !values.documentName ||
@@ -68,11 +68,18 @@ export default function DocumentsRegister() {
     } else {
       setHasErrorsStep1(false);
       setActiveStep(1)
+
+
+      // const fileUri = selectedFile.uri;
+      // const responseBlob = await fetch(fileUri)
+      // const blob = await responseBlob.blob()
+    
       const documents = {
         name: values.documentName,
         type: values.documentType,
         description: values.description,
         size:(selectedFile.size).toFixed(2)
+        // blob: blob
       };
 
       setSelectedFiles([...selectedFiles, documents]);
@@ -80,49 +87,76 @@ export default function DocumentsRegister() {
   };
   console.log(selectedFile)
 
-  const handleSendDocuments = async () => {
+  const handleSendDocumentes = async () => {
     const { documentName, documentType, description } = getValues();
   
     try {
       const json = await AsyncStorage.getItem("usuarioLogado");
       const usuario = json ? JSON.parse(json) : null;
-      if (!usuario || selectedFiles.length === 0) return;
   
-      // // for (const file of selectedFiles) {
-      // //   const fileRef = ref(storage, `documents/${file.name}`);
-      // //   const response = await fetch(file.uri);
-      // //   const blob = await response.blob();
-      // //   const uploadResult = await uploadBytes(fileRef, blob);
-      // //   const fileURL = await getDownloadURL(uploadResult.ref);
+      if (!usuario) {
+        console.error("Usuário não encontrado no AsyncStorage!");
+        return;
+      }
   
-      // //   await addDoc(collection(db, "documents"), {d
-      // //     name: documentName,
-      // //     type: documentType,
-      // //     description,
-      // //     fileURL,
-      // //     userId: usuario.uid,
-      // //     createdAt: new Date(),
-      // //   });
-      // // }
+      if (!selectedFiles || selectedFiles.length === 0) {
+        console.error("Nenhum arquivo selecionado!");
+        return;
+      }
   
-      // reset();
-      // setSelectedFiles([]);
+      // Enviar todos os documentos
+      for (const file of selectedFiles) {
+        const response = await fetch(file.uri);
+        const blob = await response.blob();
+  
+        // debugger
+        await new Promise<void>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            try {
+              const base64String = reader.result;
+  
+              const documentoData: IDocumento = {
+                nome: file.name,
+                categoria: file.type,
+                descricao: file.description,
+                userEmail: usuario.email
+                // blob: file.blob
+              };
+  
+              await addDoc(collection(db, "documents"), {
+                ...documentoData,
+                status: "AGUARDANDO",
+                createdAt: new Date(),
+              });
+  
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+  
+      reset();
+      setSelectedFiles([]); // limpar todos os arquivos
   
       Toast.show({
         type: "success",
-        text1: "Documentos enviados com sucesso!",
+        text1: "Todos os documentos foram enviados com sucesso!",
         position: "top",
       });
   
+      setHasErrorsStep1(false);
       router.push("/home/HomeDocuments");
     } catch (error) {
-      console.error("Erro ao enviar documentos:", error);
-      Toast.show({
-        type: "error",
-        text1: "Erro ao enviar documentos",
-      });
+      console.error("Erro ao registrar documentos:", error);
+      setHasErrorsStep1(true);
     }
   };
+  
   
 
   const pickDocument = async () => {
@@ -305,6 +339,7 @@ export default function DocumentsRegister() {
           buttonFillColor="#3498DB"
           buttonNextTextColor="#FFFFFF"
           buttonPreviousTextColor="#C0C0C0"
+          onSubmit={handleSendDocumentes}
         >
           <Text variant="headlineMedium" style={styles.title}>
             Confirme os detalhes do documento
