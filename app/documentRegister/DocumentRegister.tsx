@@ -95,7 +95,7 @@ export default function DocumentsRegister() {
       // //   const uploadResult = await uploadBytes(fileRef, blob);
       // //   const fileURL = await getDownloadURL(uploadResult.ref);
   
-      // //   await addDoc(collection(db, "documents"), {
+      // //   await addDoc(collection(db, "documents"), {d
       // //     name: documentName,
       // //     type: documentType,
       // //     description,

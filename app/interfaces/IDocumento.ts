@@ -1,11 +1,13 @@
 export interface IDocumento {
+    id?: string;
     nome: string;
-    status?: StatusDocumento ;
+    status?: StatusKey ;
     categoria: TipoDocumento.TipoDocumentoValue ;
-    descriçao: string;
+    descricao: string;
     userEmail?: string;
 }
 
+type StatusKey = keyof typeof StatusDocumento;
 export enum StatusDocumento {
     AGUARDANDO = 'Aguardando',
     APROVADO = 'Aprovado',

@@ -8,13 +8,8 @@ export default function GlobalFAB() {
   const pathname = usePathname(); // Obtém a rota atual
 
   const handlePress = () => {
-    router.push("/home/DocumentRegister"); // Navega para a tela desejada
+    router.push("/documentRegister/DocumentRegister"); // Navega para a tela desejada
   };
-
-  // Oculta o FAB se estiver na rota '/home/DocumentRegister'
-  if (pathname === "/home/DocumentRegister") {
-    return null;
-  }
 
   return (
     <View style={styles.fabContainer}>
