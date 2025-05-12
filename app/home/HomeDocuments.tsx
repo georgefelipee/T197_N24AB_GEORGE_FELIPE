@@ -13,9 +13,6 @@ export default function HomeDocuments() {
   const [search, setSearch] = useState('');
   const [showStatusOptions, setShowStatusOptions] = useState(false);
 
-  const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(false);
-
   const { colors } = useTheme();
 
 
@@ -95,23 +92,19 @@ export default function HomeDocuments() {
         <View style={{ backgroundColor: 'rgba(44, 44, 44, 1)', marginTop: 16, padding: 10, borderRadius: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Checkbox
-              status={checked1 ? 'checked' : 'unchecked'}
-              onPress={() => setChecked1(!checked1)}
+              status={checkedAprovado ? 'checked' : 'unchecked'}
+              onPress={() => setCheckedAprovado(!checkedAprovado)}
             />
             <Text style={{ fontSize: 14 }}>Documento Aprovado</Text>
           </View>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <Checkbox
-              status={checked2 ? 'checked' : 'unchecked'}
-              onPress={() => setChecked2(!checked2)}
+              status={checkedAguardando ? 'checked' : 'unchecked'}
+              onPress={() => setCheckedAguardando(!checkedAguardando)}
             />
             <Text style={{ fontSize: 14 }}>Documento Pendente</Text>
           </View>
-
-          <Button mode="outlined" compact onPress={() => console.log('Filtrar')}>
-            Filtrar
-          </Button>
         </View>
       )}
 
