@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
 import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
@@ -10,13 +10,34 @@ interface DocumentCardProps {
   statusColor: (status: keyof typeof StatusDocumento) => string;
 }
 
+
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
  const [expanded, setExpanded] = useState(false);
 
  const deletarDocumento = async () => {
-  await handleDeleteDocument(item.id);
-  
+  await handleDeleteDocument(item.id!);
 }
+
+
+ const showConfirmDialog = () => {
+    return Alert.alert(
+      "Confirmar Exclusão",
+      "Você deseja excluir esse documento ?",
+      [
+        {
+          text: "Excluir",
+          onPress: () => {
+            deletarDocumento();
+          },
+        },
+    
+        {
+          text: "Voltar",
+        },
+      ]
+    );
+  };
+
   return (
     <Card style={styles.card}>
       <TouchableOpacity>
@@ -37,7 +58,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
            <Text>Descrição: {item.descricao}</Text>
            <View style={styles.actions}>
              <IconButton icon="pencil" onPress={() => {}} />
-             <IconButton icon="delete" onPress={deletarDocumento} />
+             <IconButton icon="delete" onPress={showConfirmDialog} />
            </View>
          </View>
        )}
