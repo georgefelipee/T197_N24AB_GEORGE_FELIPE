@@ -116,6 +116,7 @@ export default function HomeDocuments() {
       )}
 
       <FlatList
+        style={{marginTop: 16}}
         data={documentosFiltrados}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 100 }}
