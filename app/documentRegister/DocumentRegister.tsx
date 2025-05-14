@@ -84,7 +84,7 @@ export default function DocumentsRegister() {
       const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-
+    
     const base64WithMime = `data:${selectedFile.mimeType};base64,${base64}`;
 
     debugger
@@ -123,12 +123,9 @@ export default function DocumentsRegister() {
       for (const file of selectedFiles) {
       
         // debugger
-        await new Promise<void>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = async () => {
+        await new Promise<void>(async (resolve, reject) => {
             try {
-              const base64String = reader.result;
-  
+              
               const documentoData: IDocumento = {
                 nome: file.name,
                 categoria: file.type,
@@ -148,10 +145,12 @@ export default function DocumentsRegister() {
             } catch (err) {
               reject(err);
             }
-          };
-          reader.onerror = reject;
+          
+          // reader.onerror = reject;
           // reader.readAsDataURL();
-        });
+        }).catch((err) => {
+          console.log("erro",err)
+        })
       }
   
       reset();
@@ -501,4 +500,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
 
