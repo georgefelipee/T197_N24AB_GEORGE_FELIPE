@@ -121,9 +121,7 @@ export default function DocumentsRegister() {
   
       // Enviar todos os documentos
       for (const file of selectedFiles) {
-        const response = await fetch(file.uri);
-        const blob = await response.blob();
-  
+      
         // debugger
         await new Promise<void>((resolve, reject) => {
           const reader = new FileReader();
@@ -152,7 +150,7 @@ export default function DocumentsRegister() {
             }
           };
           reader.onerror = reject;
-          reader.readAsDataURL(blob);
+          // reader.readAsDataURL();
         });
       }
   
