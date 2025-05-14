@@ -24,6 +24,7 @@ import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
 
 import { IDocumento } from "../interfaces/IDocumento";
+import * as FileSystem from 'expo-file-system';
 
 import { TipoDocumento } from "../interfaces/IDocumento";
 
@@ -78,15 +79,21 @@ export default function DocumentsRegister() {
       setActiveStep(1)
 
 
-      // const fileUri = selectedFile.uri;
-      // const responseBlob = await fetch(fileUri)
-      // const blob = await responseBlob.blob()
-    
+  
+       // Converter para base64
+      const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+    const base64WithMime = `data:${selectedFile.mimeType};base64,${base64}`;
+
+    debugger
       const documents = {
         name: values.documentName,
         type: values.documentType,
         description: values.description,
-        size:(selectedFile.size).toFixed(2)
+        size:(selectedFile.size).toFixed(2),
+        base64: base64WithMime,
         // blob: blob
       };
 
@@ -128,7 +135,8 @@ export default function DocumentsRegister() {
                 nome: file.name,
                 categoria: file.type,
                 descricao: file.description,
-                userEmail: usuario.email
+                userEmail: usuario.email,
+                base64: file.base64,
                 // blob: file.blob
               };
   
