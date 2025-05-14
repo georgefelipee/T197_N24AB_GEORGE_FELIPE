@@ -13,6 +13,8 @@ export default function Perfil() {
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editando, setEditando] = useState(false);
+
 
   useEffect(() => {
     const carregarDadosUsuario = async () => {
@@ -25,7 +27,7 @@ export default function Perfil() {
           
           console.log('Email encontrado no AsyncStorage:', usuarioEmail);
           setEmail(usuarioEmail);
-
+debugger
           const usuarioEncontrado = await buscarUsuarioPorEmail(usuarioEmail);
 
           console.log('Usuário encontrado no Firebase:', usuarioEncontrado);
@@ -99,16 +101,6 @@ export default function Perfil() {
           disabled={loading}
           
         />
-        <Button
-          mode="contained"
-          onPress={() => atualizarCampo('nome', nome)}
-          style={styles.button}
-          loading={loading}
-          disabled={loading}
-          compact 
-        >
-          Editar
-        </Button>
       </View>
 
       <View style={styles.inputRow}>
@@ -122,16 +114,6 @@ export default function Perfil() {
           mode="outlined"
           disabled={loading}
         />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('email', email)}
-          loading={loading}
-          disabled={loading}
-        >
-          Editar
-        </Button>
       </View>
 
       <View style={styles.inputRow}>
@@ -144,16 +126,6 @@ export default function Perfil() {
           mode="outlined"
           disabled={loading}
         />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('telefone', telefone)}
-          loading={loading}
-          disabled={loading}
-        >
-          Editar
-        </Button>
       </View>
 
       <View style={styles.inputRow}>
@@ -172,17 +144,38 @@ export default function Perfil() {
             />
           }
         />
-        <Button
-          mode="contained"
-          compact
-          style={styles.button}
-          onPress={() => atualizarCampo('senha', senha)}
-          loading={loading}
-          disabled={loading}
-        >
-          Editar
-        </Button>
       </View>
+      <Button
+          mode="contained"
+          onPress={async () => {
+            if (editando) {
+              console.log('Dados a serem salvos:', {
+                nome,
+                email,
+                telefone,
+                senha
+              });
+              await atualizarCampo('nome', nome);
+              await atualizarCampo('email', email);
+              await atualizarCampo('telefone', telefone);
+              await atualizarCampo('senha', senha);
+            }
+            // if (email !== usuarioEmail) {
+            //   const usuarioString = await AsyncStorage.getItem('usuarioLogado');
+            //   if (usuarioString) {
+            //     const usuario = JSON.parse(usuarioString);
+            //     usuario.email = email;  // Atualiza o email com o novo valor
+            //     await AsyncStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+            //   }
+            // }
+            setEditando(!editando);
+          }}
+          loading={loading}
+          style={{ marginTop: 20, backgroundColor: editando ? '#4CAF50' : '#B0B0B0' }}
+        >
+          {editando ? 'Salvar' : 'Editar'}
+      </Button>
+
     </View>
   );
 }
