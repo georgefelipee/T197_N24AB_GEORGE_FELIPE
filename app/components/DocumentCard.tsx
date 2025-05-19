@@ -4,7 +4,8 @@ import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
 import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
 import { handleDeleteDocument } from '../services/documentService';
-
+import { Dialog, Portal, Button } from 'react-native-paper';
+import WebView from 'react-native-webview';
 interface DocumentCardProps {
   item: IDocumento;
   statusColor: (status: keyof typeof StatusDocumento) => string;
@@ -13,6 +14,7 @@ interface DocumentCardProps {
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
  const [expanded, setExpanded] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
 
  const deletarDocumento = async () => {
   await handleDeleteDocument(item.id!);
@@ -39,6 +41,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
   };
 
   return (
+    <>
     <Card style={styles.card}>
       <TouchableOpacity>
         <View style={styles.row}>
@@ -57,12 +60,29 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
            <Text>Tipo de Documento: {item.categoria}</Text>
            <Text>Descrição: {item.descricao}</Text>
            <View style={styles.actions}>
+              <IconButton icon="eye" onPress={() => setShowPDF(true)} />
              <IconButton icon="pencil" onPress={() => {}} />
              <IconButton icon="delete" onPress={showConfirmDialog} />
            </View>
          </View>
        )}
     </Card>
+       <Portal>
+        <Dialog visible={showPDF} onDismiss={() => setShowPDF(false)} style={{ height: '90%' }}>
+          <Dialog.Title>Visualizar PDF</Dialog.Title>
+          <Dialog.Content style={{ flex: 1, height: 600 }}>
+            <WebView
+              originWhitelist={['*']}
+              source={{ uri: item.base64! }} // já vem como data:application/pdf;base64,...
+              style={{ flex: 1 }}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowPDF(false)}>Fechar</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
   );
 };
 

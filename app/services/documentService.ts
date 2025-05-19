@@ -25,7 +25,7 @@ export async function getAllDocumentsByEmail(
       categoria: data.categoria || '',
       descricao: data.descricao || '',
       userEmail: data.userEmail || '',
-      fileBase64: data.fileBase64 || '',
+      fileBase64: data.base64 || '',
       createdAt: data.createdAt ? data.createdAt.toDate() : null,
     } as IDocumento);
   });
