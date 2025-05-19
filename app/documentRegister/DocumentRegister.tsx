@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigation } from '@react-navigation/native'; 
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList, Platform } from "react-native";
 import {
   Text,
   TextInput,
@@ -77,17 +77,18 @@ export default function DocumentsRegister() {
     } else {
       setHasErrorsStep1(false);
       setActiveStep(1)
-
-
-  
-       // Converter para base64
+    
+    let base64WithMime = "";
+   
+    if (Platform.OS !== 'web') {
       const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-    
-    const base64WithMime = `data:${selectedFile.mimeType};base64,${base64}`;
 
-    debugger
+       base64WithMime = `data:${selectedFile.mimeType};base64,${base64}`;
+      // continue com seu código aqui
+    }
+
       const documents = {
         name: values.documentName,
         type: values.documentType,
