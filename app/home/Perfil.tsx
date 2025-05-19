@@ -27,7 +27,6 @@ export default function Perfil() {
           
           console.log('Email encontrado no AsyncStorage:', usuarioEmail);
           setEmail(usuarioEmail);
-debugger
           const usuarioEncontrado = await buscarUsuarioPorEmail(usuarioEmail);
 
           console.log('Usuário encontrado no Firebase:', usuarioEncontrado);
@@ -53,16 +52,15 @@ debugger
       alert('Email não encontrado. Não é possível atualizar.');
       return;
     }
-
+    const user = await AsyncStorage.getItem('usuarioLogado')
+    const json = user ? JSON.parse(user) : null;
     try {
       setLoading(true);
-      const sucesso = await atualizarUsuarioPorEmail(email, {
+      const sucesso = await atualizarUsuarioPorEmail(json.email, {
         [campo]: valor,
       });
   
       if (sucesso) {
-        alert(`${campo} atualizado com sucesso!`);
-        
         // Atualizar AsyncStorage se for o email que foi alterado
         if (campo === 'email') {
           const usuarioString = await AsyncStorage.getItem('usuarioLogado');
@@ -103,18 +101,6 @@ debugger
         />
       </View>
 
-      <View style={styles.inputRow}>
-        <TextInput
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-          mode="outlined"
-          disabled={loading}
-        />
-      </View>
 
       <View style={styles.inputRow}>
         <TextInput
