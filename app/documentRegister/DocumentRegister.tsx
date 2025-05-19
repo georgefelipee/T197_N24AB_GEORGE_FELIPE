@@ -250,7 +250,15 @@ export default function DocumentsRegister() {
                   mode="outlined"
                   style={styles.uploadButton}
                   onPress={async () => {
-                    const result = await DocumentPicker.getDocumentAsync({});
+                    const result = await DocumentPicker.getDocumentAsync({
+                        type: [
+                        'application/pdf',         // PDF
+                        'image/jpeg',              // JPG
+                        'image/png',               // PNG
+                        'image/jpg',               // JPG
+                      ],
+                      multiple: false,
+                    });
                     if (
                       !result.canceled &&
                       result.assets &&
