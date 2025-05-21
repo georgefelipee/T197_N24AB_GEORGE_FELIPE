@@ -5,6 +5,7 @@ import {
   doc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { IDocumento } from '../interfaces/IDocumento';
@@ -41,5 +42,26 @@ export async function handleDeleteDocument(id: string) {
     console.log('Documento deletado com sucesso');
   } catch (error) {
     console.log('Erro ao deletar documento: ', error);
+  }
+}
+
+
+export async function updateDocument(
+  id: string,
+  nome: string,
+  descricao: string,
+  categoria: string
+) {
+  try {
+    const docRef = doc(db, 'documents', id);
+    await updateDoc(docRef, {
+      nome,
+      descricao,
+      categoria,
+    });
+
+    console.log('Documento atualizado com sucesso');
+  } catch (error) {
+    console.log('Erro ao atualizar documento: ', error);
   }
 }

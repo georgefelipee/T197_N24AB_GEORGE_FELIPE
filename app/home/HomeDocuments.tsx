@@ -65,7 +65,14 @@ export default function HomeDocuments() {
   });
 
   const renderItem = ({ item }: { item: IDocumento }) => (
-    <DocumentCard item={item} statusColor={statusColor} />
+    <DocumentCard item={item} statusColor={statusColor} callGetDocuments={() => {
+        AsyncStorage.getItem('usuarioLogado').then((value) => {
+      if (value) {
+        const usuario = JSON.parse(value);
+        const usuarioEmail = usuario.email;
+        buscarDocumentos(usuarioEmail); // Chamar a função para buscar documentos
+      }})
+    }} />
   );
 
   return (

@@ -4,16 +4,19 @@ import { Dialog, Portal, Button, TextInput, useTheme, Modal } from 'react-native
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
-import { IDocumento, StatusDocumento } from '../interfaces/IDocumento';
-import { handleDeleteDocument } from '../services/documentService';
+import { IDocumento, StatusDocumento, TipoDocumento } from '../interfaces/IDocumento';
+import { handleDeleteDocument, updateDocument } from '../services/documentService';
+import { Picker } from '@react-native-picker/picker';
+import Toast from 'react-native-toast-message';
 
 interface DocumentCardProps {
   item: IDocumento;
   statusColor: (status: keyof typeof StatusDocumento) => string;
+  callGetDocuments: () => void;
 }
 
 
-const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
+const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor, callGetDocuments }) => {
    const theme = useTheme();
   
  const [expanded, setExpanded] = useState(false);
@@ -48,8 +51,17 @@ const [categoria, setCategoria] = useState(item.categoria || '');
   const handleSaveEdit = () => {
   // Aqui você pode chamar seu serviço para salvar
   console.log("Salvar:", { id: item.id, nome, descricao, categoria });
+  updateDocument(item.id!, nome, descricao, categoria);
+  Toast.show({
+    type: 'success',
+    text1: 'Documento atualizado com sucesso!',
+    position: 'bottom',
+    visibilityTime: 2000,
+  });
+  callGetDocuments();
   setEditVisible(false);
 };
+ const documentTypes = TipoDocumento.tipoDocumentoValues || [];
 
   return (
     <>
@@ -115,6 +127,25 @@ const [categoria, setCategoria] = useState(item.categoria || '');
       activeOutlineColor="#08A698"
       theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
     />
+
+    <Text style={{ color: '#fff', marginBottom: 8 }}>Tipo de Documento</Text>
+       <Picker
+                selectedValue={categoria}
+                onValueChange={setCategoria}
+                style={{
+                  height: 50,
+                  width: '100%',
+                  backgroundColor: '#1e1e1e',
+                  color: '#fff',
+                  borderRadius: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <Picker.Item label="Selecione um tipo" value="" />
+                {documentTypes.map((type) => (
+                  <Picker.Item key={type} label={type} value={type} />
+                ))}
+              </Picker>
 
     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
       <Button onPress={() => setEditVisible(false)} textColor="#aaa">
