@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Dialog, Portal, Button, TextInput } from 'react-native-paper';
+
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
@@ -13,6 +15,10 @@ interface DocumentCardProps {
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
  const [expanded, setExpanded] = useState(false);
+ const [editVisible, setEditVisible] = useState(false);
+const [nome, setNome] = useState(item.nome);
+const [descricao, setDescricao] = useState(item.descricao || '');
+const [categoria, setCategoria] = useState(item.categoria || '');
 
  const deletarDocumento = async () => {
   await handleDeleteDocument(item.id!);
@@ -37,8 +43,14 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
       ]
     );
   };
+  const handleSaveEdit = () => {
+  // Aqui você pode chamar seu serviço para salvar
+  console.log("Salvar:", { id: item.id, nome, descricao, categoria });
+  setEditVisible(false);
+};
 
   return (
+    <>
     <Card style={styles.card}>
       <TouchableOpacity>
         <View style={styles.row}>
@@ -57,12 +69,38 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
            <Text>Tipo de Documento: {item.categoria}</Text>
            <Text>Descrição: {item.descricao}</Text>
            <View style={styles.actions}>
-             <IconButton icon="pencil" onPress={() => {}} />
+             <IconButton icon="pencil" onPress={() => setEditVisible(true)} />
              <IconButton icon="delete" onPress={showConfirmDialog} />
            </View>
          </View>
        )}
     </Card>
+    <Portal>
+  <Dialog visible={editVisible} onDismiss={() => setEditVisible(false)}>
+    <Dialog.Title>Editar Documento</Dialog.Title>
+    <Dialog.Content>
+      <TextInput
+        label="Nome"
+        value={nome}
+        onChangeText={setNome}
+        style={{ marginBottom: 10 }}
+      />
+      <TextInput
+        label="Descrição"
+        value={descricao}
+        onChangeText={setDescricao}
+        style={{ marginBottom: 10 }}
+      />
+     
+    </Dialog.Content>
+    <Dialog.Actions>
+      <Button onPress={() => setEditVisible(false)}>Cancelar</Button>
+      <Button onPress={handleSaveEdit}>Salvar</Button>
+    </Dialog.Actions>
+  </Dialog>
+</Portal>
+
+    </>
   );
 };
 
