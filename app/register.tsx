@@ -5,7 +5,8 @@ import { TextInput, Button, Text, HelperText } from 'react-native-paper';
 import { db } from '../firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
-import { verificarEmailJaCadastrado } from './services/authService'; 
+import { verificarEmailJaCadastrado } from './services/authService';
+import PhoneInput from 'react-native-phone-number-input';
 
 export default function Register() {
   const router = useRouter();
@@ -114,13 +115,15 @@ export default function Register() {
       />
       <HelperText type="error" visible={!!erros.email}>{erros.email}</HelperText>
 
-      <TextInput
-        label="Telefone"
-        value={telefone}
-        onChangeText={setTelefone}
-        keyboardType="phone-pad"
-        style={styles.input}
-        error={!!erros.telefone}
+      <PhoneInput
+        defaultValue={telefone}
+        defaultCode="BR"
+        layout="first"
+        onChangeFormattedText={(text) => setTelefone(text)}
+        containerStyle={styles.phoneContainer}
+        textContainerStyle={styles.phoneTextContainer}
+        textInputStyle={{ color: '#fff' }}
+        codeTextStyle={{ color: '#fff' }}
       />
       <HelperText type="error" visible={!!erros.telefone}>{erros.telefone}</HelperText>
 
@@ -132,7 +135,7 @@ export default function Register() {
         autoCorrect={false}
         style={styles.input}
         error={!!erros.senha}
-        right={  
+        right={
           <TextInput.Icon
             icon={mostrarSenha ? 'eye-off' : 'eye'}
             onPress={() => setMostrarSenha(!mostrarSenha)}
@@ -150,7 +153,7 @@ export default function Register() {
         autoCorrect={false}
         style={styles.input}
         error={!!erros.confirmarSenha}
-        right={  
+        right={
           <TextInput.Icon
             icon={mostrarSenha ? 'eye-off' : 'eye'}
             onPress={() => setMostrarSenha(!mostrarSenha)}
@@ -219,4 +222,18 @@ const styles = StyleSheet.create({
     color: '#3498DB',
     fontWeight: 'bold',
   },
+  phoneContainer: {
+    width: '100%',
+    height: 60,
+    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: '#212121',
+    borderWidth: 0.5,
+    borderColor: '#C0C0C0',
+  },
+  phoneTextContainer: {
+    backgroundColor: '#212121',
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+  }
 });
