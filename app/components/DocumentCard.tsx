@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, Portal, Button, TextInput, useTheme, Modal } from 'react-native-paper';
 
-import { View, TouchableOpacity, Alert } from 'react-native';
+import { View, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import styles from '../style/HomeDocumentsStyles';
 import { IDocumento, StatusDocumento, TipoDocumento } from '../interfaces/IDocumento';
@@ -18,6 +18,7 @@ interface DocumentCardProps {
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor, callGetDocuments }) => {
    const theme = useTheme();
+   
   
  const [expanded, setExpanded] = useState(false);
  const [editVisible, setEditVisible] = useState(false);
@@ -27,10 +28,25 @@ const [categoria, setCategoria] = useState(item.categoria || '');
 
  const deletarDocumento = async () => {
   await handleDeleteDocument(item.id!);
+  console.log("Documento deletado com sucesso");
+  Toast.show({
+    type: 'success',
+    text1: 'Documento excluído com sucesso!',
+    position: 'top',
+    visibilityTime: 2000,
+  });
+  callGetDocuments();
 }
 
 
  const showConfirmDialog = () => {
+  if (Platform.OS === 'web') {
+    const confirmed = window.confirm("Você deseja excluir esse documento?");
+    if (confirmed) {
+      deletarDocumento();
+    }
+    return;
+  }
     return Alert.alert(
       "Confirmar Exclusão",
       "Você deseja excluir esse documento ?",
