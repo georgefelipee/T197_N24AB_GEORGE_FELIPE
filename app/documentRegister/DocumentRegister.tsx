@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigation } from '@react-navigation/native'; 
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList, Platform } from "react-native";
 import {
   Text,
   TextInput,
@@ -9,6 +9,7 @@ import {
   HelperText,
   useTheme,
   IconButton,
+  ActivityIndicator,
 } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -23,6 +24,7 @@ import { ProgressSteps, ProgressStep } from "react-native-progress-steps";
 import Toast from "react-native-toast-message";
 
 import { IDocumento } from "../interfaces/IDocumento";
+import * as FileSystem from 'expo-file-system';
 
 import { TipoDocumento } from "../interfaces/IDocumento";
 
@@ -49,6 +51,7 @@ export default function DocumentsRegister() {
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
   const [activeStep, setActiveStep] = useState(0); 
+  const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
   const documentTypes = TipoDocumento.tipoDocumentoValues || [];
@@ -74,17 +77,24 @@ export default function DocumentsRegister() {
     } else {
       setHasErrorsStep1(false);
       setActiveStep(1)
-
-
-      // const fileUri = selectedFile.uri;
-      // const responseBlob = await fetch(fileUri)
-      // const blob = await responseBlob.blob()
     
+    let base64WithMime = "";
+   
+    if (Platform.OS !== 'web') {
+      const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+       base64WithMime = `data:${selectedFile.mimeType};base64,${base64}`;
+      // continue com seu código aqui
+    }
+
       const documents = {
         name: values.documentName,
         type: values.documentType,
         description: values.description,
-        size:(selectedFile.size).toFixed(2)
+        size:(selectedFile.size).toFixed(2),
+        base64: base64WithMime,
         // blob: blob
       };
 
@@ -94,8 +104,8 @@ export default function DocumentsRegister() {
   console.log(selectedFile)
 
   const handleSendDocumentes = async () => {
-    const { documentName, documentType, description } = getValues();
-  
+    setIsLoading(true);
+
     try {
       const json = await AsyncStorage.getItem("usuarioLogado");
       const usuario = json ? JSON.parse(json) : null;
@@ -112,21 +122,17 @@ export default function DocumentsRegister() {
   
       // Enviar todos os documentos
       for (const file of selectedFiles) {
-        const response = await fetch(file.uri);
-        const blob = await response.blob();
-  
+      
         // debugger
-        await new Promise<void>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = async () => {
+        await new Promise<void>(async (resolve, reject) => {
             try {
-              const base64String = reader.result;
-  
+              
               const documentoData: IDocumento = {
                 nome: file.name,
                 categoria: file.type,
                 descricao: file.description,
-                userEmail: usuario.email
+                userEmail: usuario.email,
+                base64: file.base64,
                 // blob: file.blob
               };
   
@@ -140,10 +146,12 @@ export default function DocumentsRegister() {
             } catch (err) {
               reject(err);
             }
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+          
+          // reader.onerror = reject;
+          // reader.readAsDataURL();
+        }).catch((err) => {
+          console.log("erro",err)
+        })
       }
   
       reset();
@@ -154,6 +162,7 @@ export default function DocumentsRegister() {
         text1: "Todos os documentos foram enviados com sucesso!",
         position: "top",
       });
+      setIsLoading(false);
   
       setHasErrorsStep1(false);
       router.push("/home/HomeDocuments");
@@ -242,7 +251,15 @@ export default function DocumentsRegister() {
                   mode="outlined"
                   style={styles.uploadButton}
                   onPress={async () => {
-                    const result = await DocumentPicker.getDocumentAsync({});
+                    const result = await DocumentPicker.getDocumentAsync({
+                        type: [
+                        'application/pdf',         // PDF
+                        'image/jpeg',              // JPG
+                        'image/png',               // PNG
+                        'image/jpg',               // JPG
+                      ],
+                      multiple: false,
+                    });
                     if (
                       !result.canceled &&
                       result.assets &&
@@ -355,6 +372,7 @@ export default function DocumentsRegister() {
           buttonFillColor="#3498DB"
           buttonNextTextColor="#FFFFFF"
           buttonPreviousTextColor="#C0C0C0"
+          buttonFinishDisabled={isLoading}
           onSubmit={handleSendDocumentes}
         >
           <Text variant="headlineMedium" style={styles.title}>
@@ -386,10 +404,17 @@ export default function DocumentsRegister() {
             <Text style={styles.noDocumentsText}>Nenhum documento selecionado.</Text>
           )}
 
+
+
           {/* Botão para adicionar mais documentos */}
           <Button mode="outlined" onPress={handleGoBack} style={styles.uploadButton2}>
             Adicionar mais documentos
           </Button>
+
+          {isLoading && (<>
+            <Text  style={styles.title}>Enviando documentos...</Text>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </>)}
         </ProgressStep>
 
       </ProgressSteps>
@@ -443,7 +468,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   uploadButton2: {
-    marginTop: 16,
+    marginVertical: 16,
   },
   input: {
     marginBottom: 16,
@@ -484,4 +509,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
 

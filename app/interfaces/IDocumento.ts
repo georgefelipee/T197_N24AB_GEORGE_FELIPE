@@ -5,6 +5,7 @@ export interface IDocumento {
     categoria: TipoDocumento.TipoDocumentoValue ;
     descricao: string;
     userEmail?: string;
+    base64?: string;
 }
 
 type StatusKey = keyof typeof StatusDocumento;
