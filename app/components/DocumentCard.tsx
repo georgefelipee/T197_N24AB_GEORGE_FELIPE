@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, Portal, Button, TextInput } from 'react-native-paper';
+import { Dialog, Portal, Button, TextInput, useTheme } from 'react-native-paper';
 
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
@@ -14,6 +14,8 @@ interface DocumentCardProps {
 
 
 const DocumentCard: React.FC<DocumentCardProps> = ({ item, statusColor }) => {
+   const theme = useTheme();
+  
  const [expanded, setExpanded] = useState(false);
  const [editVisible, setEditVisible] = useState(false);
 const [nome, setNome] = useState(item.nome);
@@ -76,7 +78,7 @@ const [categoria, setCategoria] = useState(item.categoria || '');
        )}
     </Card>
     <Portal>
-  <Dialog visible={editVisible} onDismiss={() => setEditVisible(false)}   style={{ backgroundColor: '#f1eaff' }} >
+  <Dialog theme={theme} visible={editVisible} onDismiss={() => setEditVisible(false)}   style={{ backgroundColor: '#f1eaff' }} >
     <Dialog.Title>Editar Documento</Dialog.Title>
     <Dialog.Content>
       <TextInput
