@@ -76,7 +76,7 @@ const [categoria, setCategoria] = useState(item.categoria || '');
        )}
     </Card>
     <Portal>
-  <Dialog visible={editVisible} onDismiss={() => setEditVisible(false)}>
+  <Dialog visible={editVisible} onDismiss={() => setEditVisible(false)}   style={{ backgroundColor: '#f1eaff' }} >
     <Dialog.Title>Editar Documento</Dialog.Title>
     <Dialog.Content>
       <TextInput
