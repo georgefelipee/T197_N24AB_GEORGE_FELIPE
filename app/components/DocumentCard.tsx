@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, Portal, Button, TextInput, useTheme } from 'react-native-paper';
+import { Dialog, Portal, Button, TextInput, useTheme, Modal } from 'react-native-paper';
 
 import { View, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
@@ -77,30 +77,56 @@ const [categoria, setCategoria] = useState(item.categoria || '');
          </View>
        )}
     </Card>
-    <Portal>
-  <Dialog theme={theme} visible={editVisible} onDismiss={() => setEditVisible(false)}   style={{ backgroundColor: '#f1eaff' }} >
-    <Dialog.Title>Editar Documento</Dialog.Title>
-    <Dialog.Content>
-      <TextInput
-        label="Nome"
-        value={nome}
-        onChangeText={setNome}
-        style={{ marginBottom: 10 }}
-      />
-      <TextInput
-        label="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
-        style={{ marginBottom: 10 }}
-      />
-     
-    </Dialog.Content>
-    <Dialog.Actions>
-      <Button onPress={() => setEditVisible(false)}>Cancelar</Button>
-      <Button onPress={handleSaveEdit}>Salvar</Button>
-    </Dialog.Actions>
-  </Dialog>
+<Portal>
+  <Modal
+    visible={editVisible}
+    onDismiss={() => setEditVisible(false)}
+    contentContainerStyle={{
+      backgroundColor: '#1e1e1e',
+      padding: 20,
+      margin: 20,
+      borderRadius: 16,
+    }}
+  >
+    <Text style={{ color: '#fff', fontSize: 18, marginBottom: 16, fontWeight: 'bold' }}>
+      Editar Documento
+    </Text>
+
+    <TextInput
+      label="Nome"
+      value={nome}
+      onChangeText={setNome}
+      mode="outlined"
+      style={{ marginBottom: 12 }}
+      textColor="#fff"
+      outlineColor="#555"
+      activeOutlineColor="#08A698"
+      theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
+    />
+
+    <TextInput
+      label="Descrição"
+      value={descricao}
+      onChangeText={setDescricao}
+      mode="outlined"
+      style={{ marginBottom: 12 }}
+      textColor="#fff"
+      outlineColor="#555"
+      activeOutlineColor="#08A698"
+      theme={{ colors: { text: '#fff', placeholder: '#aaa' } }}
+    />
+
+    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
+      <Button onPress={() => setEditVisible(false)} textColor="#aaa">
+        Cancelar
+      </Button>
+      <Button onPress={handleSaveEdit} textColor="#08A698">
+        Salvar
+      </Button>
+    </View>
+  </Modal>
 </Portal>
+
 
     </>
   );
