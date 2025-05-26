@@ -162,12 +162,21 @@ const [categoria, setCategoria] = useState(item.categoria || '');
                   <Picker.Item key={type} label={type} value={type} />
                 ))}
               </Picker>
+    {!descricao || !nome || !categoria ? (
+      <View>
+        <Text style={{ color: '#aaa', fontSize: 12, marginTop: 8 }}>
+          * Todos os Campos obrigatórios
+        </Text>
+      </View>
+     
+    ) : null}
+
 
     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
       <Button onPress={() => setEditVisible(false)} textColor="#aaa">
         Cancelar
       </Button>
-      <Button onPress={handleSaveEdit} textColor="#08A698">
+      <Button  disabled={!descricao || !nome || !categoria} onPress={handleSaveEdit} textColor="#08A698">
         Salvar
       </Button>
     </View>
